@@ -14,3 +14,4 @@ O sistema segue uma abordagem modular, onde cada domínio é projetado para func
 - Make sure to install MYSQL https://dev.mysql.com/downloads/mysql/ 🐬
 - Make sure to install DBeaver https://dbeaver.io/download/
 - Create a biblioteca database on Beaver!!! 
+- Dentro do Intellij, jogar o mysql-connector-j-9.2.0.jar em File -> Project Structure -> Libraries e Modules(Ambos)
