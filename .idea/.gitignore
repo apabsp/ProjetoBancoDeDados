@@ -1,0 +1,20 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Ignore IntelliJ IDEA project files
+.idea/
+
+# Ignore build output for backend (Java)
+out/
+target/
+
+# Ignore node_modules for frontend (React)
+node_modules/
+
+# Ignore compiled JavaScript from React
+build/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
