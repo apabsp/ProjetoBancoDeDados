@@ -1,49 +1,28 @@
 package com.biblioteca.backend.dto;
 
 public class ObraDTO {
-    private String codBarras;
     private String titulo;
-    private String anoLanc;
+    private String ano;
     private String genero;
-
-    public ObraDTO() {
-    }
-
-    public ObraDTO(String codBarras, String titulo, String anoLanc, String genero) {
-        this.codBarras = codBarras;
-        this.titulo = titulo;
-        this.anoLanc = anoLanc;
-        this.genero = genero;
-    }
-
-    public String getCodBarras() {
-        return codBarras;
-    }
-
-    public void setCodBarras(String codBarras) {
-        this.codBarras = codBarras;
-    }
+    //Cod de barras, em teoria, vai ser gerado depois.
 
     public String getTitulo() {
         return titulo;
     }
-
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
 
-    public String getAnoLanc() {
-        return anoLanc;
+    public String getAno() {
+        return ano;
     }
-
-    public void setAnoLanc(String anoLanc) {
-        this.anoLanc = anoLanc;
+    public void setAno(String ano) {
+        this.ano = ano;
     }
 
     public String getGenero() {
         return genero;
     }
-
     public void setGenero(String genero) {
         this.genero = genero;
     }

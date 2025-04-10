@@ -3,6 +3,7 @@ import './App.css';
 import React, { useState } from 'react';
 import EditoraForm from './components/EditoraForm';
 import ObraForm from './components/ObraForm';
+import ObraInsertForm from './components/ObraInsertForm';
 
 function App() {
 
@@ -51,24 +52,15 @@ function App() {
 
   return (
       <div className="App">
-        <header className="App-header">
           <h1>📚 Biblioteca App</h1>
           <button onClick={recreateDatabase} disabled={loading}>
             {loading ? "Criando..." : "🔁 Criar Database"}
           </button>
           <p>{message}</p>
-          <img src={logo} className="App-logo" alt="logo" />
-
-          <button onClick={recreateObraTable} disabled={loading}>
-            {loading ? "Criando..." : "📄 Criar Tabela Obra"}
-          </button>
           
-        </header>
-        <h1>Cadastro de Editoras</h1>
-        <EditoraForm />
 
         <h1>Cadastro de Obras</h1>
-        <ObraForm />
+          <ObraInsertForm /> {/* Aqui */}
       </div>
     );
   }
