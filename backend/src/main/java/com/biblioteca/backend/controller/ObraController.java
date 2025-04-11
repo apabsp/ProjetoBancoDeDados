@@ -3,11 +3,45 @@ package com.biblioteca.backend.controller;
 import com.biblioteca.backend.dto.ObraDTO;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-
 import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
+import com.biblioteca.backend.service.DatabaseService;
+import com.biblioteca.backend.dto.ObraDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+@RestController
+@RequestMapping("/api/obra")
+public class ObraController {
+
+    @Autowired
+    private DatabaseService databaseService;
+
+    @PostMapping("/inserir")
+    public String inserirObra(@RequestBody ObraDTO obraDTO) {
+        // ano is already converted to Date in ObraDTO, just pass it along
+        return databaseService.inserirObra(obraDTO.getTitulo(), obraDTO.getAno(), obraDTO.getGenero());
+    }
+
+    @DeleteMapping("/deletar/{id}")
+    public String deletarObra(@PathVariable Long id) {
+        return databaseService.deletarObra(id);
+    }
+
+    @PutMapping("/atualizar/{id}")
+    public String atualizarObra(@PathVariable Long id, @RequestBody ObraDTO obraDTO) {
+        return databaseService.atualizarObra(id, obraDTO.getTitulo(), obraDTO.getAno(), obraDTO.getGenero());
+    }
+
+    @GetMapping("/visualizar")
+    public String visualizarObras() {
+        return databaseService.visualizarObras();
+    }
+}
+
+
+/*
 @RestController
 public class ObraController {
 
@@ -38,3 +72,5 @@ public class ObraController {
         }
     }
 }
+*/
+

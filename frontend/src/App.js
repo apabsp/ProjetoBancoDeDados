@@ -1,29 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
 import React, { useState } from 'react';
-import EditoraForm from './components/EditoraForm';
-import ObraForm from './components/ObraForm';
 import ObraInsertForm from './components/ObraInsertForm';
+import './App.css';
 
 function App() {
 
-  const [message, setMessage] = useState("Sample message");
+  const [message, setMessage] = useState("Clique no botão para criar a database!");
   const [loading, setLoading] = useState(false);
 
   const recreateDatabase = async () => {
-    setLoading(true);//We can have an animation playing while this is true
+    setLoading(true);
 
     try{
       const response = await fetch("http://localhost:8080/api/init", {
         method: "POST",
       });
 
-      if (!response.ok) throw new Error("Something went wrong whhen creating database");
+      if (!response.ok) throw new Error("Something went wrong when creating database");
 
       const text = await response.text();
       setMessage(`Success: ${text}`);
     } catch (err) {
-      setMessage(`Erro: ${err.message}`);
+      setMessage(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -37,33 +34,31 @@ function App() {
         method: "POST",
       });
   
-      if (!response.ok) throw new Error("Erro ao criar tabela de obra");
+      if (!response.ok) throw new Error("Error creating Obra table");
   
       const text = await response.text();
-      setMessage(`Sucesso: ${text}`);
+      setMessage(`Success: ${text}`);
     } catch (err) {
-      setMessage(`Erro: ${err.message}`);
+      setMessage(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  
-
   return (
-      <div className="App">
-          <h1>📚 Biblioteca App</h1>
-          <button onClick={recreateDatabase} disabled={loading}>
-            {loading ? "Criando..." : "🔁 Criar Database"}
-          </button>
-          <p>{message}</p>
-          
+    <div className="App">
+      <header className="App-header">
+        <h1 className="title">📚 Biblioteca App</h1>
+        <button className="action-button" onClick={recreateDatabase} disabled={loading}>
+          {loading ? "Criando..." : "🔁 Criar Database"}
+        </button>
+        <p className="message">{message}</p>
+        <h3 className="section-title">Cadastro de Obras</h3>
+        <ObraInsertForm />
+      </header>
 
-        <h1>Cadastro de Obras</h1>
-          <ObraInsertForm /> {/* Aqui */}
-      </div>
-    );
-  }
-
+    </div>
+  );
+}
 
 export default App;
