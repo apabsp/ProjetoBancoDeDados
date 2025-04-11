@@ -24,6 +24,11 @@ public class ObraController {
         return databaseService.inserirObra(obraDTO.getTitulo(), obraDTO.getAno(), obraDTO.getGenero());
     }
 
+    @DeleteMapping("/deletarPorTitulo")
+    public String deletarObraPorTitulo(@RequestParam String titulo) {
+        return databaseService.deletarObraPorTitulo(titulo);
+    }
+
     @DeleteMapping("/deletar/{id}")
     public String deletarObra(@PathVariable Long id) {
         return databaseService.deletarObra(id);

@@ -1,0 +1,41 @@
+{
+	"info": {
+		"_postman_id": "31b55700-9254-4cf8-9811-9788f4ebcb37",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43990724",
+		"_collection_link": "https://antonio-5058480.postman.co/workspace/Antonio's-Workspace~6b260d9f-ffaf-4bfc-87e2-138b25ca7f53/collection/43990724-31b55700-9254-4cf8-9811-9788f4ebcb37?action=share&source=collection_link&creator=43990724"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8080/api/obra",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"titulo\": \"Dom Casmurro\",\r\n  \"ano\": \"1954-07-29\",\r\n  \"genero\": \"Fantasia\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/obra/inserir",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"obra",
+						"inserir"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

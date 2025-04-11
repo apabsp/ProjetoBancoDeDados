@@ -1,6 +1,7 @@
 package com.biblioteca.backend.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -59,8 +60,26 @@ public class DatabaseService {
             return "Erro ao inserir obra: " + e.getMessage();
         }
     }
+    // Still need to work on this one
+    public String deletarObraPorTitulo(String titulo) {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            String sql = "DELETE FROM obra WHERE titulo = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, titulo);
 
-    // Method to delete an "Obra"
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                return "Obra deletada com sucesso!";
+            } else {
+                return "Nenhuma obra encontrada com esse título.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erro ao deletar obra: " + e.getMessage();
+        }
+    }
+
+    // Method to delete an "Obra" with an id
     public String deletarObra(Long id) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             // The SQL query to delete the Obra by its ID (assuming `id` is the `cod_barras` in the DB)
