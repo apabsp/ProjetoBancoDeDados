@@ -70,6 +70,19 @@ public class DatabaseService {
         }
     }
 
+    public String inserirGenero(String nome) {
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            String sql = "INSERT INTO Genero (nome) VALUES (?)";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, nome);
+                stmt.executeUpdate();
+                return "Gênero inserido com sucesso!";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir gênero: " + e.getMessage();
+        }
+    }
 
     // Method to insert a new "Obra"
     public String inserirObra(String titulo, java.sql.Date ano, String genero) {
@@ -266,5 +279,259 @@ public class DatabaseService {
 }
 
      */
+
+    public String visualizarObrasPorAutor(String idAutor) {
+        String sql = """
+        SELECT O.cod_barras,
+               O.titulo,
+               O.ano_lanc
+          FROM Obra O
+          JOIN Escreve E
+            ON O.cod_barras = E.fk_Obra_cod_barras
+         WHERE E.fk_Autor_id = ?
+        """;
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, idAutor);
+            ResultSet rs = stmt.executeQuery();
+
+            StringBuilder resultado = new StringBuilder();
+            while (rs.next()) {
+                resultado.append("Cod Barras: ")
+                        .append(rs.getString("cod_barras"))
+                        .append(", Título: ")
+                        .append(rs.getString("titulo"))
+                        .append(", Ano: ")
+                        .append(rs.getDate("ano_lanc"))
+                        .append("\n");
+            }
+
+            if (resultado.length() == 0) {
+                return "Nenhuma obra encontrada para o autor de ID " + idAutor;
+            }
+            return resultado.toString();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar obras por autor: " + e.getMessage();
+        }
+    }
+    // Insere um novo Livro (PK = fk_Obra_cod_barras)
+    public String inserirLivro(String codBarrasObra) {
+        String sql = "INSERT INTO Livro (fk_Obra_cod_barras) VALUES (?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, codBarrasObra);
+            stmt.executeUpdate();
+            return "Livro inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir livro: " + e.getMessage();
+        }
+    }
+
+    // Insere um novo Artigo (PK = fk_Obra_cod_barras)
+    public String inserirArtigo(String codBarrasObra) {
+        String sql = "INSERT INTO Artigo (fk_Obra_cod_barras) VALUES (?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, codBarrasObra);
+            stmt.executeUpdate();
+            return "Artigo inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir artigo: " + e.getMessage();
+        }
+    }
+
+    // Insere uma nova Edição (PK composta: id + fk_livro_cod_barras)
+    public String inserirEdicao(String idEdicao, String codBarrasLivro) {
+        String sql = "INSERT INTO Edicao (id, fk_livro_cod_barras) VALUES (?, ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, idEdicao);
+            stmt.setString(2, codBarrasLivro);
+            stmt.executeUpdate();
+            return "Edição inserida com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir edição: " + e.getMessage();
+        }
+    }
+    // Insere uma nova Estante (PK = numeracao, com atributo prateleira)
+    public String inserirEstante(String numeracao, String prateleira) {
+        String sql = "INSERT INTO Estante (numeracao, prateleira) VALUES (?, ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, numeracao);
+            stmt.setString(2, prateleira);
+            stmt.executeUpdate();
+            return "Estante inserida com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir estante: " + e.getMessage();
+        }
+    }
+
+    // Insere um novo Exemplar (PK = id; FK para edição ou artigo, e FK para estante)
+    public String inserirExemplar(String idExemplar,
+                                  String fkEdicao,    // pode ser null se for artigo
+                                  String fkArtigo,    // pode ser null se for edição
+                                  String fkEstante) {
+        String sql = """
+        INSERT INTO Exemplar
+            (id, fk_edicao, fk_artigo, fk_estante)
+        VALUES (?, ?, ?, ?)
+        """;
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, idExemplar);
+            // se for null, o JDBC vai inserir NULL
+            if (fkEdicao != null) stmt.setString(2, fkEdicao);
+            else               stmt.setNull(2, Types.VARCHAR);
+
+            if (fkArtigo != null) stmt.setString(3, fkArtigo);
+            else                 stmt.setNull(3, Types.VARCHAR);
+
+            stmt.setString(4, fkEstante);
+            stmt.executeUpdate();
+            return "Exemplar inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir exemplar: " + e.getMessage();
+        }
+    }
+    // Insere um novo Telefone (PK = telefone_PK, atributo telefone como INT)
+    public String inserirTelefone(String telefonePK, int telefone) {
+        String sql = "INSERT INTO Telefone (telefone_PK, telefone) VALUES (?, ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, telefonePK);
+            stmt.setInt(2, telefone);
+            stmt.executeUpdate();
+            return "Telefone inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir telefone: " + e.getMessage();
+        }
+    }
+
+    // Insere uma nova Pessoa
+// (numero INT, CEP INT, complemento VARCHAR, matricula VARCHAR PK, fk_telefone VARCHAR)
+    public String inserirPessoa(int numero,
+                                int cep,
+                                String complemento,
+                                String matricula,
+                                String fkTelefone) {
+        String sql = """
+        INSERT INTO Pessoa
+            (numero, CEP, complemento, matricula, fk_telefone)
+        VALUES (?, ?, ?, ?, ?)
+        """;
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, numero);
+            stmt.setInt(2, cep);
+            stmt.setString(3, complemento);
+            stmt.setString(4, matricula);
+            stmt.setString(5, fkTelefone);
+            stmt.executeUpdate();
+            return "Pessoa inserida com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir pessoa: " + e.getMessage();
+        }
+    }
+    // Insere um novo Cliente (PK = fk_Pessoa, atributo historico VARCHAR)
+    public String inserirCliente(String fkPessoa, String historico) {
+        String sql = "INSERT INTO Cliente (fk_Pessoa, historico) VALUES (?, ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, fkPessoa);
+            stmt.setString(2, historico);
+            stmt.executeUpdate();
+            return "Cliente inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir cliente: " + e.getMessage();
+        }
+    }
+
+    // Insere um novo Funcionário (PK e FK = fk_Pessoa)
+    public String inserirFuncionario(String fkPessoa) {
+        String sql = "INSERT INTO Funcionario (fk_Pessoa) VALUES (?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, fkPessoa);
+            stmt.executeUpdate();
+            return "Funcionário inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir funcionário: " + e.getMessage();
+        }
+    }
+
+    // Insere um novo Empréstimo/Aluguel
+// (PK = id VARCHAR, atributos hora, data_prevista_dev, data_devolucao, data_emprestimo: TIME;
+//  FK para Exemplar e Cliente)
+    public String inserirEmprestimoAluga(
+            String id,
+            java.sql.Time hora,
+            java.sql.Time dataPrevistaDev,
+            java.sql.Time dataDevolucao,
+            java.sql.Time dataEmprestimo,
+            String fkExemplar,
+            String fkCliente
+    ) {
+        String sql = """
+        INSERT INTO Emprestimo_aluga
+          (id, hora, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+            stmt.setTime(2, hora);
+            stmt.setTime(3, dataPrevistaDev);
+            stmt.setTime(4, dataDevolucao);
+            stmt.setTime(5, dataEmprestimo);
+            stmt.setString(6, fkExemplar);
+            stmt.setString(7, fkCliente);
+            stmt.executeUpdate();
+            return "Empréstimo/Aluguel inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir Empréstimo/Aluguel: " + e.getMessage();
+        }
+    }
+    // Insere um novo registro em Altera
+// (PK composta por fk_funcionario e fk_emprestimo_aluga; data_alteracao TIMESTAMP)
+    public String inserirAltera(String fkFuncionario,
+                                String fkEmprestimoAluga,
+                                java.sql.Timestamp dataAlteracao) {
+        String sql = """
+        INSERT INTO Altera
+            (fk_funcionario, fk_emprestimo_aluga, data_alteracao)
+        VALUES (?, ?, ?)
+        """;
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, fkFuncionario);
+            stmt.setString(2, fkEmprestimoAluga);
+            stmt.setTimestamp(3, dataAlteracao);
+
+            stmt.executeUpdate();
+            return "Altera inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir altera: " + e.getMessage();
+        }
+    }
 
 }
