@@ -1,64 +1,29 @@
-import React, { useState } from 'react';
-import ObraInsertForm from './components/ObraInsertForm';
-import './App.css';
+import React from 'react';
+import DbInitSection from './components/DbInitSection';
+import ObraForm from './components/ObraForm';
+import EditoraForm from './components/EditoraForm';
+import AutorForm from './components/AutorForm';
+import VinculoSection from './components/VinculoSection';
+import VisualizarObras from './components/VisualizarObras';
 
-function App() {
-
-  const [message, setMessage] = useState("Clique no botão para criar a database!");
-  const [loading, setLoading] = useState(false);
-
-  const recreateDatabase = async () => {
-    setLoading(true);
-
-    try{
-      const response = await fetch("http://localhost:8080/api/init", {
-        method: "POST",
-      });
-
-      if (!response.ok) throw new Error("Something went wrong when creating database");
-
-      const text = await response.text();
-      setMessage(`Success: ${text}`);
-    } catch (err) {
-      setMessage(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const recreateObraTable = async () => {
-    setLoading(true);
-  
-    try {
-      const response = await fetch("http://localhost:8080/api/init/obra", {
-        method: "POST",
-      });
-  
-      if (!response.ok) throw new Error("Error creating Obra table");
-  
-      const text = await response.text();
-      setMessage(`Success: ${text}`);
-    } catch (err) {
-      setMessage(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1 className="title">📚 Biblioteca App</h1>
-        <button className="action-button" onClick={recreateDatabase} disabled={loading}>
-          {loading ? "Criando..." : "🔁 Criar Database"}
-        </button>
-        <p className="message">{message}</p>
-        <h3 className="section-title">Cadastro de Obras</h3>
-        <ObraInsertForm />
-      </header>
-
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <h1 className="text-3xl font-bold text-center text-indigo-600">📚 Biblioteca App</h1>
+        <div className="bg-red-200 p-4">
+          Error message!
+        </div>
+        <DbInitSection />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ObraForm />
+          <EditoraForm />
+          <AutorForm />
+        </div>
+        <VinculoSection />
+        <VisualizarObras />
+      </div>
     </div>
   );
 }
 
-export default App;

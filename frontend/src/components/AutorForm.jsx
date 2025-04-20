@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-export default function EditoraForm() {
+export default function AutorForm() {
   const [nome, setNome] = useState('');
   const [msg, setMsg] = useState('');
 
@@ -10,7 +10,7 @@ export default function EditoraForm() {
     setMsg('');
     try {
       const id = uuidv4();
-      const res = await fetch('http://localhost:8080/api/editora/inserir', {
+      const res = await fetch('http://localhost:8080/api/autor/inserir', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, nome }),
@@ -26,17 +26,17 @@ export default function EditoraForm() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow">
-      <h3 className="font-semibold mb-2">Nova Editora</h3>
+      <h3 className="font-semibold mb-2">Novo Autor</h3>
       <input
         className="w-full mb-2 p-2 border rounded"
-        placeholder="Nome da Editora"
+        placeholder="Nome do Autor"
         value={nome}
         onChange={e => setNome(e.target.value)}
       />
       <button
         type="submit"
-        className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >Inserir Editora</button>
+        className="w-full py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+      >Inserir Autor</button>
       {msg && <p className="mt-2 text-sm">{msg}</p>}
     </form>
   );

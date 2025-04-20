@@ -1,66 +1,48 @@
 import React, { useState } from 'react';
 
-function ObraForm() {
-  const [codBarras, setCodBarras] = useState('');
+export default function ObraForm() {
   const [titulo, setTitulo] = useState('');
-  const [anoLanc, setAnoLanc] = useState('');
-  const [genero, setGenero] = useState('');
-  const [message, setMessage] = useState('');
+  const [ano, setAno] = useState('');
+  const [msg, setMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const obra = {
-      codBarras,
-      titulo,
-      anoLanc,
-      genero
-    };
-
+    setMsg('');
     try {
-      const response = await fetch('http://localhost:8080/api/obra/inserir', {
+      const res = await fetch('http://localhost:8080/api/obra/inserir', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(obra)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo, ano }),
       });
-
-      if (!response.ok) throw new Error('Erro ao inserir obra');
-
-      const result = await response.text();
-      setMessage(`Sucesso: ${result}`);
-    } catch (err) {
-      setMessage(`Erro: ${err.message}`);
+      const text = await res.text();
+      if (!res.ok) throw new Error(text);
+      setMsg(`✅ ${text}`);
+      setTitulo(''); setAno('');
+    } catch (e) {
+      setMsg(`❌ ${e.message}`);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Código de Barras:
-        <input type="text" value={codBarras} onChange={(e) => setCodBarras(e.target.value)} required />
-      </label>
-      <br />
-      <label>
-        Título:
-        <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required />
-      </label>
-      <br />
-      <label>
-        Ano de Lançamento:
-        <input type="text" value={anoLanc} onChange={(e) => setAnoLanc(e.target.value)} required />
-      </label>
-      <br />
-      <label>
-        Gênero:
-        <input type="text" value={genero} onChange={(e) => setGenero(e.target.value)} required />
-      </label>
-      <br />
-      <button type="submit">📥 Cadastrar Obra</button>
-      <p>{message}</p>
+    <form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow">
+      <h3 className="font-semibold mb-2">Nova Obra</h3>
+      <input
+        className="w-full mb-2 p-2 border rounded"
+        placeholder="Título"
+        value={titulo}
+        onChange={e => setTitulo(e.target.value)}
+      />
+      <input
+        type="date"
+        className="w-full mb-2 p-2 border rounded"
+        value={ano}
+        onChange={e => setAno(e.target.value)}
+      />
+      <button
+        type="submit"
+        className="w-full py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >Inserir Obra</button>
+      {msg && <p className="mt-2 text-sm">{msg}</p>}
     </form>
   );
 }
-
-export default ObraForm;
