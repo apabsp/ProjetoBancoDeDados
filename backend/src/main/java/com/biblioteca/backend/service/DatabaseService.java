@@ -689,4 +689,566 @@ public class DatabaseService {
         }
     }
 
+    // Insere um novo Empréstimo/Aluguel
+// (PK = id VARCHAR, atributos hora, data_prevista_dev, data_devolucao, data_emprestimo: TIME;
+//  FK para Exemplar e Cliente)
+    public String inserirEmprestimoAluga(
+            String id,
+            java.sql.Time hora,
+            java.sql.Time dataPrevistaDev,
+            java.sql.Time dataDevolucao,
+            java.sql.Time dataEmprestimo,
+            String fkExemplar,
+            String fkCliente
+    ) {
+        String sql = """
+        INSERT INTO Emprestimo_aluga
+          (id, hora, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+            stmt.setTime(2, hora);
+            stmt.setTime(3, dataPrevistaDev);
+            stmt.setTime(4, dataDevolucao);
+            stmt.setTime(5, dataEmprestimo);
+            stmt.setString(6, fkExemplar);
+            stmt.setString(7, fkCliente);
+            stmt.executeUpdate();
+            return "Empréstimo/Aluguel inserido com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir Empréstimo/Aluguel: " + e.getMessage();
+        }
+    }
+
+    public String atualizarEditora(String id, String novoNome) {
+        String sql = "UPDATE Editora SET nome = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoNome);
+            stmt.setString(2, id);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                return "Editora atualizada com sucesso!";
+            } else {
+                return "Editora não encontrada para o id: " + id;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar editora: " + e.getMessage();
+        }
+    }
+
+    public String atualizarAutor(String id, String novoNome) {
+        String sql = "UPDATE Autor SET nome = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoNome);
+            stmt.setString(2, id);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                return "Autor atualizado com sucesso!";
+            } else {
+                return "Autor não encontrado para o id: " + id;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar autor: " + e.getMessage();
+        }
+    }
+
+    public String atualizarGenero(String nomeAntigo, String novoNome) {
+        String sql = "UPDATE Genero SET nome = ? WHERE nome = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoNome);
+            stmt.setString(2, nomeAntigo);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                return "Gênero atualizado com sucesso!";
+            } else {
+                return "Gênero não encontrado para o nome: " + nomeAntigo;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar gênero: " + e.getMessage();
+        }
+    }
+
+    public String deletarLivro(String codBarrasObra) {
+        String sql = "DELETE FROM Livro WHERE fk_Obra_cod_barras = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, codBarrasObra);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) {
+                return "Livro deletado com sucesso!";
+            } else {
+                return "Livro não encontrado para cod_barras: " + codBarrasObra;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar livro: " + e.getMessage();
+        }
+    }
+
+    public String visualizarLivros() {
+        String sql = """
+        SELECT L.fk_Obra_cod_barras AS cod_barras,
+               O.titulo,
+               O.ano_lanc
+          FROM Livro L
+          JOIN Obra O
+            ON L.fk_Obra_cod_barras = O.cod_barras
+        """;
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Cod Barras: ").append(rs.getString("cod_barras"))
+                        .append(", Título: ").append(rs.getString("titulo"))
+                        .append(", Ano: ").append(rs.getDate("ano_lanc"))
+                        .append("\n");
+            }
+            return sb.length() > 0
+                    ? sb.toString()
+                    : "Nenhum livro cadastrado.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar livros: " + e.getMessage();
+        }
+    }
+
+    // ARTIGO
+    public String atualizarArtigo(String codBarrasAntigo, String novoCodBarras) {
+        String sql = "UPDATE Artigo SET fk_Obra_cod_barras = ? WHERE fk_Obra_cod_barras = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoCodBarras);
+            stmt.setString(2, codBarrasAntigo);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Artigo atualizado com sucesso!";
+            else           return "Artigo não encontrado para cod_barras: " + codBarrasAntigo;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar artigo: " + e.getMessage();
+        }
+    }
+
+    public String deletarArtigo(String codBarrasObra) {
+        String sql = "DELETE FROM Artigo WHERE fk_Obra_cod_barras = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, codBarrasObra);
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Artigo deletado com sucesso!";
+            else           return "Artigo não encontrado para cod_barras: " + codBarrasObra;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar artigo: " + e.getMessage();
+        }
+    }
+
+    public String visualizarArtigos() {
+        String sql = "SELECT fk_Obra_cod_barras FROM Artigo";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Artigo (cod_barras): ")
+                        .append(rs.getString("fk_Obra_cod_barras"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhum artigo cadastrado.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar artigos: " + e.getMessage();
+        }
+    }
+
+
+    // EDIÇÃO
+    public String atualizarEdicao(String idEdicaoAntigo, String codBarrasLivro, String novoIdEdicao) {
+        String sql = "UPDATE Edicao SET id = ? WHERE id = ? AND fk_livro_cod_barras = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoIdEdicao);
+            stmt.setString(2, idEdicaoAntigo);
+            stmt.setString(3, codBarrasLivro);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Edição atualizada com sucesso!";
+            else           return "Edição não encontrada para id: " + idEdicaoAntigo;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar edição: " + e.getMessage();
+        }
+    }
+
+    public String deletarEdicao(String idEdicao, String codBarrasLivro) {
+        String sql = "DELETE FROM Edicao WHERE id = ? AND fk_livro_cod_barras = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, idEdicao);
+            stmt.setString(2, codBarrasLivro);
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Edição deletada com sucesso!";
+            else           return "Edição não encontrada para id: " + idEdicao;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar edição: " + e.getMessage();
+        }
+    }
+
+    public String visualizarEdicoes() {
+        String sql = "SELECT id, fk_livro_cod_barras FROM Edicao";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Edição ID: ").append(rs.getString("id"))
+                        .append(", Livro cod_barras: ").append(rs.getString("fk_livro_cod_barras"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhuma edição cadastrada.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar edições: " + e.getMessage();
+        }
+    }
+
+
+    // ESTANTE
+    public String atualizarEstante(String numeracao, String novaPrateleira) {
+        String sql = "UPDATE Estante SET prateleira = ? WHERE numeracao = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novaPrateleira);
+            stmt.setString(2, numeracao);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Estante atualizada com sucesso!";
+            else           return "Estante não encontrada para numeracao: " + numeracao;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar estante: " + e.getMessage();
+        }
+    }
+
+    public String visualizarEstantes() {
+        String sql = "SELECT numeracao, prateleira FROM Estante";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Numeracao: ").append(rs.getString("numeracao"))
+                        .append(", Prateleira: ").append(rs.getString("prateleira"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhuma estante cadastrada.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar estantes: " + e.getMessage();
+        }
+    }
+
+
+    // EXEMPLAR
+    public String atualizarExemplar(String idExemplar,
+                                    String novoFkEdicao,
+                                    String novoFkArtigo,
+                                    String novoFkEstante) {
+        String sql = """
+        UPDATE Exemplar
+           SET fk_edicao = ?, fk_artigo = ?, fk_estante = ?
+         WHERE id = ?
+        """;
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            if (novoFkEdicao != null) stmt.setString(1, novoFkEdicao);
+            else                       stmt.setNull(1, Types.VARCHAR);
+
+            if (novoFkArtigo != null) stmt.setString(2, novoFkArtigo);
+            else                      stmt.setNull(2, Types.VARCHAR);
+
+            stmt.setString(3, novoFkEstante);
+            stmt.setString(4, idExemplar);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Exemplar atualizado com sucesso!";
+            else           return "Exemplar não encontrado para id: " + idExemplar;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar exemplar: " + e.getMessage();
+        }
+    }
+
+    public String deletarExemplar(String idExemplar) {
+        String sql = "DELETE FROM Exemplar WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, idExemplar);
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Exemplar deletado com sucesso!";
+            else           return "Exemplar não encontrado para id: " + idExemplar;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar exemplar: " + e.getMessage();
+        }
+    }
+
+    public String visualizarExemplares() {
+        String sql = "SELECT id, fk_edicao, fk_artigo, fk_estante FROM Exemplar";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("ID: ").append(rs.getString("id"))
+                        .append(", Edição: ").append(rs.getString("fk_edicao"))
+                        .append(", Artigo: ").append(rs.getString("fk_artigo"))
+                        .append(", Estante: ").append(rs.getString("fk_estante"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhum exemplar cadastrado.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar exemplares: " + e.getMessage();
+        }
+    }
+    // CLIENTE
+    public String atualizarCliente(String fkPessoa, String novoHistorico) {
+        String sql = "UPDATE Cliente SET historico = ? WHERE fk_Pessoa = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoHistorico);
+            stmt.setString(2, fkPessoa);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) return "Cliente atualizado com sucesso!";
+            else           return "Cliente não encontrado para fk_Pessoa: " + fkPessoa;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar cliente: " + e.getMessage();
+        }
+    }
+
+    public String deletarCliente(String fkPessoa) {
+        String sql = "DELETE FROM Cliente WHERE fk_Pessoa = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, fkPessoa);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) return "Cliente deletado com sucesso!";
+            else           return "Cliente não encontrado para fk_Pessoa: " + fkPessoa;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar cliente: " + e.getMessage();
+        }
+    }
+
+    public String visualizarClientes() {
+        String sql = "SELECT fk_Pessoa, historico FROM Cliente";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Pessoa: ").append(rs.getString("fk_Pessoa"))
+                        .append(", Histórico: ").append(rs.getString("historico"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhum cliente cadastrado.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar clientes: " + e.getMessage();
+        }
+    }
+
+
+    // FUNCIONÁRIO
+    public String atualizarFuncionario(String fkPessoaAntigo, String novoFkPessoa) {
+        String sql = "UPDATE Funcionario SET fk_Pessoa = ? WHERE fk_Pessoa = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoFkPessoa);
+            stmt.setString(2, fkPessoaAntigo);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) return "Funcionário atualizado com sucesso!";
+            else           return "Funcionário não encontrado para fk_Pessoa: " + fkPessoaAntigo;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar funcionário: " + e.getMessage();
+        }
+    }
+
+    public String deletarFuncionario(String fkPessoa) {
+        String sql = "DELETE FROM Funcionario WHERE fk_Pessoa = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, fkPessoa);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) return "Funcionário deletado com sucesso!";
+            else           return "Funcionário não encontrado para fk_Pessoa: " + fkPessoa;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar funcionário: " + e.getMessage();
+        }
+    }
+
+    public String visualizarFuncionarios() {
+        String sql = "SELECT fk_Pessoa FROM Funcionario";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Funcionário (Pessoa): ").append(rs.getString("fk_Pessoa")).append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhum funcionário cadastrado.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar funcionários: " + e.getMessage();
+        }
+    }
+
+
+    // EMPRÉSTIMO_ALUGA
+    public String atualizarEmprestimoAluga(
+            String id,
+            java.sql.Time hora,
+            java.sql.Time dataPrevistaDev,
+            java.sql.Time dataDevolucao,
+            java.sql.Time dataEmprestimo,
+            String fkExemplar,
+            String fkCliente
+    ) {
+        String sql = """
+        UPDATE Emprestimo_aluga
+           SET hora = ?, data_prevista_dev = ?, data_devolucao = ?, data_emprestimo = ?, fk_exemplar = ?, fk_cliente = ?
+         WHERE id = ?
+        """;
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setTime(1, hora);
+            stmt.setTime(2, dataPrevistaDev);
+            stmt.setTime(3, dataDevolucao);
+            stmt.setTime(4, dataEmprestimo);
+            stmt.setString(5, fkExemplar);
+            stmt.setString(6, fkCliente);
+            stmt.setString(7, id);
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return "Empréstimo/Aluguel atualizado com sucesso!";
+            else           return "Empréstimo/Aluguel não encontrado para id: " + id;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar Empréstimo/Aluguel: " + e.getMessage();
+        }
+    }
+
+    public String deletarEmprestimoAluga(String id) {
+        String sql = "DELETE FROM Emprestimo_aluga WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) return "Empréstimo/Aluguel deletado com sucesso!";
+            else           return "Empréstimo/Aluguel não encontrado para id: " + id;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar Empréstimo/Aluguel: " + e.getMessage();
+        }
+    }
+
+    public String visualizarEmprestimosAluga() {
+        String sql = """
+        SELECT id, hora, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente
+          FROM Emprestimo_aluga
+        """;
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("ID: ").append(rs.getString("id"))
+                        .append(", Hora: ").append(rs.getTime("hora"))
+                        .append(", Prevista Dev.: ").append(rs.getTime("data_prevista_dev"))
+                        .append(", Devolução: ").append(rs.getTime("data_devolucao"))
+                        .append(", Empréstimo: ").append(rs.getTime("data_emprestimo"))
+                        .append(", Exemplar: ").append(rs.getString("fk_exemplar"))
+                        .append(", Cliente: ").append(rs.getString("fk_cliente"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhum empréstimo/aluguel cadastrado.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar Empréstimos/Aluguéis: " + e.getMessage();
+        }
+    }
+
+
+    // ALTERA
+    public String visualizarAlteras() {
+        String sql = "SELECT fk_funcionario, fk_emprestimo_aluga, data_alteracao FROM Altera";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            StringBuilder sb = new StringBuilder();
+            while (rs.next()) {
+                sb.append("Funcionário: ").append(rs.getString("fk_funcionario"))
+                        .append(", Empréstimo: ").append(rs.getString("fk_emprestimo_aluga"))
+                        .append(", Data Alteração: ").append(rs.getTimestamp("data_alteracao"))
+                        .append("\n");
+            }
+            return sb.length() > 0 ? sb.toString() : "Nenhum registro de Altera.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao visualizar Altera: " + e.getMessage();
+        }
+    }
+
+
 }
