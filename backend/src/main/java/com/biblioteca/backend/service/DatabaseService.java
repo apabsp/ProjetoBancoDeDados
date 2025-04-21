@@ -1,4 +1,4 @@
-package com.biblioteca.backend.dal;
+package com.biblioteca.backend.service;
 
 import org.springframework.stereotype.Service;
 
@@ -6,6 +6,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Service
 public class DatabaseService {
@@ -54,6 +61,26 @@ public class DatabaseService {
         }
     }
 
+    public List<String> listarEditoras(){
+        List<String> nomes = new ArrayList<>();
+
+        String sql = "SELECT nome FROM Editora";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                nomes.add(rs.getString("nome"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("erro no listareditoras");
+        }
+
+        return nomes;
+    }
+
     public String inserirAutor(String id, String nome) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
             String sql = "INSERT INTO Autor (id, nome) VALUES (?, ?)";
@@ -68,6 +95,25 @@ public class DatabaseService {
             return "Erro ao inserir autor: " + e.getMessage();
         }
     }
+
+    public String deletarAutorPorNome(String nome){
+        String sql = "DELETE FROM Autor WHERE nome = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nome);
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                return "Autor removidocom sucesso!";
+            } else {
+                return "Nenhuma autor encontrado com nome: " + nome;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar autor: " + e.getMessage();
+        }
+    }
+
+
 
     public String inserirGenero(String nome) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
@@ -85,25 +131,53 @@ public class DatabaseService {
 
     // Method to insert a new "Obra"
     public String inserirObra(String titulo, java.sql.Date ano, String genero) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            // Generate a random UUID for cod_barras
-            String codBarras = UUID.randomUUID().toString();  // Generate a unique string for cod_barras
+            try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+                String codBarras = UUID.randomUUID().toString();
 
-            // Correct SQL query to insert values into the correct columns
-            String sql = "INSERT INTO Obra (cod_barras, titulo, ano_lanc) VALUES (?, ?, ?)";
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                stmt.setString(1, codBarras);  // Use the generated UUID for cod_barras
-                stmt.setString(2, titulo);     // Correct column for titulo
-                stmt.setDate(3, ano);           // Correct column for ano_lanc (Date)
+                // 1) se veio um gênero, garanta que ele exista em Genero
+                if (genero != null && !genero.trim().isEmpty()) {
+                    String sqlFind = "SELECT nome FROM Genero WHERE nome = ?";
+                    try (PreparedStatement psFind = connection.prepareStatement(sqlFind)) {
+                        psFind.setString(1, genero.trim());
+                        try (ResultSet rs = psFind.executeQuery()) {
+                            if (!rs.next()) {
+                                String sqlInsertGen = "INSERT INTO Genero(nome) VALUES(?)";
+                                try (PreparedStatement psInsertGen = connection.prepareStatement(sqlInsertGen)) {
+                                    psInsertGen.setString(1, genero.trim());
+                                    psInsertGen.executeUpdate();
+                                }
+                            }
+                        }
+                    }
+                }
 
-                stmt.executeUpdate();
-                return "Obra inserida com sucesso!";
+                // 2) monta o INSERT em Obra incluindo o campo genero somente se tiver vindo
+                String baseSql =
+                        "INSERT INTO Obra (cod_barras, titulo, ano_lanc" +
+                                (genero != null && !genero.trim().isEmpty() ? ", genero" : "") +
+                                ") VALUES (?, ?, ?" +
+                                (genero != null && !genero.trim().isEmpty() ? ", ?" : "") +
+                                ")";
+                try (PreparedStatement stmt = connection.prepareStatement(baseSql)) {
+                    int idx = 1;
+                    stmt.setString(idx++, codBarras);
+                    stmt.setString(idx++, titulo);
+                    stmt.setDate(idx++, ano);
+
+                    if (genero != null && !genero.trim().isEmpty()) {
+                        stmt.setString(idx, genero.trim());
+                    }
+
+                    stmt.executeUpdate();
+                    return "Obra inserida com sucesso!";
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return "Erro ao inserir obra: " + e.getMessage();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "Erro ao inserir obra: " + e.getMessage();
         }
-    }
+
     // Still need to work on this one
     public String deletarObraPorTitulo(String titulo) {
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
@@ -479,31 +553,31 @@ public class DatabaseService {
 //  FK para Exemplar e Cliente)
     public String inserirEmprestimoAluga(
             String id,
-            java.sql.Time hora,
-            java.sql.Time dataPrevistaDev,
-            java.sql.Time dataDevolucao,
-            java.sql.Time dataEmprestimo,
-            String fkExemplar,
-            String fkCliente
+            java.sql.Time      hora,
+            java.sql.Timestamp dataPrevistaDev,  // ← datetime
+            java.sql.Date      dataDevolucao,    // ← date
+            java.sql.Date      dataEmprestimo,   // ← date
+            String             fkExemplar,
+            String             fkCliente
     ) {
         String sql = """
-        INSERT INTO Emprestimo_aluga
-          (id, hora, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+    INSERT INTO Emprestimo_aluga
+      (id, hora, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """;
+        try (Connection c = DriverManager.getConnection(URL,USER,PASSWORD);
+             PreparedStatement s = c.prepareStatement(sql)) {
 
-            stmt.setString(1, id);
-            stmt.setTime(2, hora);
-            stmt.setTime(3, dataPrevistaDev);
-            stmt.setTime(4, dataDevolucao);
-            stmt.setTime(5, dataEmprestimo);
-            stmt.setString(6, fkExemplar);
-            stmt.setString(7, fkCliente);
-            stmt.executeUpdate();
+            s.setString (1, id);
+            s.setTime   (2, hora);
+            s.setTimestamp(3, dataPrevistaDev);
+            s.setDate   (4, dataDevolucao);
+            s.setDate   (5, dataEmprestimo);
+            s.setString (6, fkExemplar);
+            s.setString (7, fkCliente);
+            s.executeUpdate();
             return "Empréstimo/Aluguel inserido com sucesso!";
-        } catch (SQLException e) {
+        } catch(SQLException e) {
             e.printStackTrace();
             return "Erro ao inserir Empréstimo/Aluguel: " + e.getMessage();
         }
@@ -530,6 +604,88 @@ public class DatabaseService {
         } catch (SQLException e) {
             e.printStackTrace();
             return "Erro ao inserir altera: " + e.getMessage();
+        }
+    }
+
+
+
+    public String deletarEditoraPorNome(String nome) {
+        String sql = "DELETE FROM Editora WHERE nome = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nome);
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                return "Editora removida com sucesso!";
+            } else {
+                return "Nenhuma editora encontrada com nome: " + nome;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar editora: " + e.getMessage();
+        }
+    }
+
+    public List<String> listarEmprestimos() {
+        List<String> resultado = new ArrayList<>();
+        String sql = """
+            SELECT id,
+                   hora,
+                   data_prevista_dev,
+                   data_devolucao,
+                   data_emprestimo,
+                   fk_exemplar,
+                   fk_cliente
+              FROM Emprestimo_aluga
+            """;
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String linha = String.format(
+                        "ID: %s, Hora: %s, Prevista: %s, Devolução: %s, Empréstimo: %s, Exemplar: %s, Cliente: %s",
+                        rs.getString("id"),
+                        rs.getTime("hora"),
+                        rs.getTime("data_prevista_dev"),
+                        rs.getTime("data_devolucao"),
+                        rs.getTime("data_emprestimo"),
+                        rs.getString("fk_exemplar"),
+                        rs.getString("fk_cliente")
+                );
+                resultado.add(linha);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return resultado;
+    }
+
+    /**
+     * Deleta um empréstimo/aluguel pelo seu ID.
+     * @param id o identificador do registro em Emprestimo_aluga
+     * @return mensagem de sucesso ou erro
+     */
+    public String deletarEmprestimo(String id) {
+        String sql = "DELETE FROM Emprestimo_aluga WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) {
+                return "Empréstimo deletado com sucesso!";
+            } else {
+                return "Nenhum empréstimo encontrado com id: " + id;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar empréstimo: " + e.getMessage();
         }
     }
 

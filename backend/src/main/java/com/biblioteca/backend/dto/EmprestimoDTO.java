@@ -1,13 +1,16 @@
-package com.biblioteca.backend.controller;
+package com.biblioteca.backend.dto;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class EmprestimoDTO {
-    private String id;
-    private String hora;               // “HH:mm:ss”
-    private String dataPrevistaDev;    // “HH:mm:ss” or ISO date?
-    private String dataDevolucao;      // “HH:mm:ss”
-    private String dataEmprestimo;     // “HH:mm:ss” thiscouldbeit
-    private String fkExemplar;
-    private String fkCliente;
+    private String       id;
+    private String       hora;               // "HH:mm:ss"
+    private LocalDateTime dataPrevistaDev;   // datetime
+    private LocalDate dataDevolucao;      // date
+    private LocalDate    dataEmprestimo;     // date
+    private String       fkExemplar;
+    private String       fkCliente;
 
 
     public String getId() {
@@ -26,27 +29,27 @@ public class EmprestimoDTO {
         this.hora = hora;
     }
 
-    public String getDataPrevistaDev() {
+    public LocalDateTime getDataPrevistaDev() {
         return dataPrevistaDev;
     }
 
-    public void setDataPrevistaDev(String dataPrevistaDev) {
+    public void setDataPrevistaDev(LocalDateTime dataPrevistaDev) {
         this.dataPrevistaDev = dataPrevistaDev;
     }
 
-    public String getDataDevolucao() {
+    public LocalDate getDataDevolucao() {
         return dataDevolucao;
     }
 
-    public void setDataDevolucao(String dataDevolucao) {
+    public void setDataDevolucao(LocalDate dataDevolucao) {
         this.dataDevolucao = dataDevolucao;
     }
 
-    public String getDataEmprestimo() {
+    public LocalDate getDataEmprestimo() {
         return dataEmprestimo;
     }
 
-    public void setDataEmprestimo(String dataEmprestimo) {
+    public void setDataEmprestimo(LocalDate dataEmprestimo) {
         this.dataEmprestimo = dataEmprestimo;
     }
 

@@ -2,14 +2,8 @@ package com.biblioteca.backend.controller;
 
 import com.biblioteca.backend.dto.ObraDTO;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import java.nio.file.*;
-import java.sql.*;
-import java.util.*;
 import com.biblioteca.backend.service.DatabaseService;
-import com.biblioteca.backend.dto.ObraDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/obra")
