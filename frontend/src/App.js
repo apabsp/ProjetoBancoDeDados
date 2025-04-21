@@ -14,7 +14,7 @@ export default function App() {
       <div className="max-w-4xl mx-auto space-y-8">
         <h1 className="text-3xl font-bold text-center text-indigo-600">📚 Biblioteca App</h1>
         <div className="bg-red-200 p-4">
-          Test
+          Ainda estamos em construção! Reporte qualquer bugs :)
         </div>
 
         <DbInitSection />
