@@ -1,7 +1,6 @@
-package com.biblioteca.backend.service;
+package com.biblioteca.backend.dal;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
