@@ -1,3 +1,6 @@
+-- Switch to your database
+USE biblioteca;
+
 -- 1) Independent tables
 CREATE TABLE IF NOT EXISTS Pessoa (
     id VARCHAR(50) PRIMARY KEY,
@@ -126,3 +129,46 @@ CREATE TABLE IF NOT EXISTS Emprestimo_aluga (
     CONSTRAINT FK_Emprestimo_Exemplar FOREIGN KEY (fk_exemplar) REFERENCES Exemplar(id),
     CONSTRAINT FK_Emprestimo_Cliente  FOREIGN KEY (fk_cliente)  REFERENCES Cliente(id)
 );
+
+-- Seed data
+-- 1) Pessoas and Clientes
+INSERT IGNORE INTO Pessoa (id, nome, complemento, cep) VALUES
+  ('p1', 'João Silva', 'Apto 101', '50000-000'),
+  ('p2', 'Maria Oliveira', 'Casa 22', '51000-100'),
+  ('p3', 'Carlos Souza', NULL,        '52000-200');
+
+INSERT IGNORE INTO Cliente (id, historico, fk_Pessoa_id) VALUES
+  ('c1', 'Frequent borrower', 'p1'),
+  ('c2', 'Paid late once',    'p2'),
+  ('c3', 'New customer',      'p3');
+
+-- 2) Estantes
+INSERT IGNORE INTO Estante (prateleira, numero) VALUES
+  ('A', '01'),
+  ('A', '02'),
+  ('B', '01');
+
+-- 3) Obra, Livro, Artigo, Edicao
+INSERT IGNORE INTO Obra (cod_barras, titulo, ano_lanc, genero) VALUES
+  ('obra1', 'Exemplum Livro', '2020-05-15', NULL);
+
+INSERT IGNORE INTO Livro (fk_Obra_cod_barras) VALUES
+  ('obra1');
+
+INSERT IGNORE INTO Artigo (id, fk_Obra_cod_barras, titulo) VALUES
+  ('art1', 'obra1', 'Artigo de Exemplo');
+
+INSERT IGNORE INTO Edicao (id, livro_cod_barras, numero) VALUES
+  ('ed1', 'obra1', 1);
+
+-- 4) Exemplares
+INSERT IGNORE INTO Exemplar (
+  id,
+  fk_edicao,
+  fk_artigo,
+  fk_estante_prateleira,
+  fk_estante_numero
+) VALUES
+  ('ex1', 'ed1', 'art1', 'A', '01'),
+  ('ex2', 'ed1', 'art1', 'A', '02'),
+  ('ex3', 'ed1', 'art1', 'B', '01');

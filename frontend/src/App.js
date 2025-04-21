@@ -5,6 +5,8 @@ import EditoraForm from './components/EditoraForm';
 import AutorForm from './components/AutorForm';
 import VinculoSection from './components/VinculoSection';
 import VisualizarObras from './components/VisualizarObras';
+import ObraInsertForm from './components/ObraInsertForm';
+import EmprestimoSection from './components/EmprestimoSection';
 
 export default function App() {
   return (
@@ -12,9 +14,13 @@ export default function App() {
       <div className="max-w-4xl mx-auto space-y-8">
         <h1 className="text-3xl font-bold text-center text-indigo-600">📚 Biblioteca App</h1>
         <div className="bg-red-200 p-4">
-          Error message!
+          Ainda estamos em construção! Reporte qualquer bugs :)
         </div>
+
         <DbInitSection />
+        <div className = "grid gap-6 border-spacing-20">
+          <EmprestimoSection />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ObraForm />
           <EditoraForm />

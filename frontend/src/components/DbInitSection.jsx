@@ -30,13 +30,6 @@ export default function DbInitSection() {
         >
           Criar tudo
         </button>
-        <button
-          disabled={loading}
-          onClick={() => exec('/obra', 'Tabela Obra')}
-          className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 disabled:opacity-50"
-        >
-          Tabela Obra
-        </button>
       </div>
       {msg && <p className="mt-2 text-gray-700">{msg}</p>}
     </div>
