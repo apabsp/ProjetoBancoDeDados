@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 export default function ObraForm() {
   const [titulo, setTitulo] = useState('');
   const [ano, setAno] = useState('');
-  const [genero, setGenero] = useState('');    // ← novo estado
+  const [genero, setGenero] = useState('');
+  const [tipo, setTipo] = useState('livro'); // Novo estado para o tipo de obra
   const [msg, setMsg] = useState('');
 
   const handleSubmit = async (e) => {
@@ -11,8 +12,8 @@ export default function ObraForm() {
     setMsg('');
 
     try {
-      // monta o payload incluindo genero só se houver algo digitado
-      const payload = { titulo, ano };
+      // monta o payload incluindo genero e tipo só se houver algo digitado
+      const payload = { titulo, ano, tipo };
       if (genero.trim()) payload.genero = genero.trim();
 
       const res = await fetch('http://localhost:8080/api/obra/inserir', {
@@ -27,7 +28,8 @@ export default function ObraForm() {
       setMsg(`✅ ${text}`);
       setTitulo(''); 
       setAno(''); 
-      setGenero('');      // limpa o campo
+      setGenero(''); 
+      setTipo('livro'); // Limpa o campo tipo
     } catch (e) {
       setMsg(`❌ ${e.message}`);
     }
@@ -58,6 +60,33 @@ export default function ObraForm() {
         value={genero}
         onChange={e => setGenero(e.target.value)}
       />
+
+      {/* Campo de seleção para o tipo de obra */}
+      <div className="mb-4">
+        <label className="block mb-2">Tipo de Obra</label>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="tipo"
+              value="livro"
+              checked={tipo === 'livro'}
+              onChange={() => setTipo('livro')}
+            />
+            Livro
+          </label>
+          <label className="ml-4">
+            <input
+              type="radio"
+              name="tipo"
+              value="artigo"
+              checked={tipo === 'artigo'}
+              onChange={() => setTipo('artigo')}
+            />
+            Artigo
+          </label>
+        </div>
+      </div>
 
       <button
         type="submit"

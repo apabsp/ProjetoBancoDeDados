@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import EmprestimoForm from './EmprestimoForm';
-import DeleteEmprestimoForm from './DeleteEmprestimoForm';
 import VisualizarEmprestimos from './VisualizarEmprestimos';
 
 export default function EmprestimoSection() {
@@ -10,7 +9,6 @@ export default function EmprestimoSection() {
   return (
     <section className="space-y-6">
       <EmprestimoForm onSuccess={bump} />
-      <DeleteEmprestimoForm onDelete={bump} />
       <VisualizarEmprestimos refreshKey={refreshKey} />
     </section>
   );
