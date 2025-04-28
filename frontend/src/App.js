@@ -9,6 +9,7 @@ import PessoaForm from './components/PessoaForm.jsx';
 import ObraList from './components/ObraList.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/user/Register'; 
+import Login from './components/user/Login.js';
 
 export default function App() {
   return (
@@ -16,7 +17,7 @@ export default function App() {
       <Router>
       <Routes>
         <Route path="/register" element={<Register />} />
-        {/* You can add more routes like Login, Home, etc. */}
+        <Route path="/login" element={<Login/>}/>
       </Routes>
       </Router>
       <div className="max-w-4xl mx-auto space-y-8">

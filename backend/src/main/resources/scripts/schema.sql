@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS Livro (
     FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras)
 );
 
--- 3) Artigo with its own id PK
+-- 3) Artigo
 CREATE TABLE IF NOT EXISTS Artigo (
     id VARCHAR(50) PRIMARY KEY,
     fk_Obra_cod_barras VARCHAR(50),
@@ -86,24 +86,24 @@ CREATE TABLE IF NOT EXISTS publica (
     fk_Obra_cod_barras VARCHAR(50),
     fk_Editora_id      VARCHAR(50),
     PRIMARY KEY (fk_Obra_cod_barras, fk_Editora_id),
-    FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras),
-    FOREIGN KEY (fk_Editora_id)      REFERENCES Editora(id)
+    FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras) ON DELETE CASCADE,
+    FOREIGN KEY (fk_Editora_id)      REFERENCES Editora(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS escreve (
     fk_Autor_id          VARCHAR(50),
     fk_Obra_cod_barras   VARCHAR(50),
     PRIMARY KEY (fk_Autor_id, fk_Obra_cod_barras),
-    FOREIGN KEY (fk_Autor_id)        REFERENCES Autor(id),
-    FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras)
+    FOREIGN KEY (fk_Autor_id)        REFERENCES Autor(id) ON DELETE CASCADE,
+    FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Pertence (
     fk_Genero_nome      VARCHAR(50),
     fk_Obra_cod_barras  VARCHAR(50),
     PRIMARY KEY (fk_Genero_nome, fk_Obra_cod_barras),
-    FOREIGN KEY (fk_Genero_nome)     REFERENCES Genero(nome),
-    FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras)
+    FOREIGN KEY (fk_Genero_nome)     REFERENCES Genero(nome) ON DELETE CASCADE,
+    FOREIGN KEY (fk_Obra_cod_barras) REFERENCES Obra(cod_barras) ON DELETE CASCADE
 );
 
 -- 6) Telefone
@@ -123,6 +123,6 @@ CREATE TABLE IF NOT EXISTS Emprestimo_aluga (
     data_emprestimo    DATE,
     fk_exemplar        VARCHAR(50),
     fk_cliente         VARCHAR(50),
-    CONSTRAINT FK_Emprestimo_Exemplar FOREIGN KEY (fk_exemplar) REFERENCES Exemplar(id),
-    CONSTRAINT FK_Emprestimo_Cliente  FOREIGN KEY (fk_cliente)  REFERENCES Cliente(id)
+    CONSTRAINT FK_Emprestimo_Exemplar FOREIGN KEY (fk_exemplar) REFERENCES Exemplar(id) ON DELETE CASCADE,
+    CONSTRAINT FK_Emprestimo_Cliente  FOREIGN KEY (fk_cliente)  REFERENCES Cliente(id) ON DELETE CASCADE
 );

@@ -11,7 +11,9 @@ public class EmprestimoDTO {
     private LocalDate    dataEmprestimo;     // date
     private String       fkExemplar;
     private String       fkCliente;
+    private String       fkFuncionario; // Added field for the employee
 
+    // Getters and setters
 
     public String getId() {
         return id;
@@ -67,5 +69,15 @@ public class EmprestimoDTO {
 
     public void setFkCliente(String fkCliente) {
         this.fkCliente = fkCliente;
+    }
+
+    // Getter for fkFuncionario
+    public String getFkFuncionario() {
+        return fkFuncionario;
+    }
+
+    // Setter for fkFuncionario
+    public void setFkFuncionario(String fkFuncionario) {
+        this.fkFuncionario = fkFuncionario;
     }
 }
