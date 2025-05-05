@@ -5,59 +5,101 @@ import com.biblioteca.backend.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID; // Randomizer
 
 @RestController
 @RequestMapping("/api/emprestimo")
 public class EmprestimoController {
-    @Autowired private DatabaseService db;
 
+    @Autowired
+    private DatabaseService db;
+
+    // Endpoint para inserir um novo empréstimo
     @PostMapping("/inserir")
     public String inserirEmprestimo(@RequestBody EmprestimoDTO dto) {
+        try {
+            String id = "emp-" + UUID.randomUUID();
 
-            java.sql.Time      hora            = java.sql.Time.valueOf(dto.getHora());
-            java.sql.Timestamp previstaDev     = java.sql.Timestamp.valueOf(dto.getDataPrevistaDev());
-            java.sql.Date      dataDevolucao   = java.sql.Date.valueOf(dto.getDataDevolucao());
-            java.sql.Date      dataEmprestimo  = java.sql.Date.valueOf(dto.getDataEmprestimo());
+            Timestamp dataEmprestimo = dto.getDataEmprestimo() != null
+                    ? Timestamp.valueOf(dto.getDataEmprestimo())
+                    : null;
+
+            Timestamp dataPrevistaDev = dto.getDataPrevistaDev() != null
+                    ? Timestamp.valueOf(dto.getDataPrevistaDev())
+                    : null;
+
+            Date dataDevolucao = dto.getDataDevolucao() != null
+                    ? Date.valueOf(dto.getDataDevolucao())
+                    : null;
 
             return db.inserirEmprestimoAluga(
-                    dto.getId(), hora, previstaDev, dataDevolucao, dataEmprestimo,
-                    dto.getFkExemplar(), dto.getFkCliente()
+                    dataPrevistaDev,
+                    dataDevolucao,
+                    dataEmprestimo,
+                    dto.getFkExemplar(),
+                    dto.getFkCliente(),
+                    dto.getFkFuncionario()
             );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erro ao inserir empréstimo: " + e.getMessage();
+        }
     }
+
+
+
+
 
     @GetMapping("/visualizar")
-    public List<String> visualizarEmprestimos() {
-        return db.listarEmprestimos();
+    public List<EmprestimoDTO> visualizarEmprestimos() {
+        return db.listarEmprestimosDTO();
     }
 
-    @DeleteMapping("/delete")
-    public String deleteEmprestimo(@RequestParam String id) {
+    //
+    /*@GetMapping("/buscar")
+    public EmprestimoDTO buscarEmprestimo(@RequestParam String id) {
+        return db.buscarEmprestimoPorId(id);
+    }*/
+
+
+    @DeleteMapping("/deletar")
+    public String deletarEmprestimo(@RequestParam String id) {
         return db.deletarEmprestimo(id);
     }
-
+    //Atualizar
     @PutMapping("/alterar")
-    public String alterarEmprestimo(@RequestBody EmprestimoDTO emprestimoDTO) {
-        // Assuming `fkFuncionario` is part of the DTO and current timestamp will be used as the timestamp.
+    public String alterarEmprestimo(@RequestParam String id, @RequestBody EmprestimoDTO dto) {
+        try {
+            // Conversão dos tipos de data
+            Timestamp dataPrevistaDev = dto.getDataPrevistaDev() != null ?
+                    Timestamp.valueOf(dto.getDataPrevistaDev()) : null;
 
-        // Convert LocalDateTime to java.sql.Date for data_prevista_dev and dataEmprestimo
-        java.sql.Date dataPrevistaDev = java.sql.Date.valueOf(emprestimoDTO.getDataPrevistaDev().toLocalDate());
-        java.sql.Date dataDevolucao = java.sql.Date.valueOf(emprestimoDTO.getDataDevolucao());
-        java.sql.Date dataEmprestimo = java.sql.Date.valueOf(emprestimoDTO.getDataEmprestimo());
+            Date dataDevolucao = dto.getDataDevolucao() != null ?
+                    Date.valueOf(dto.getDataDevolucao()) : null;
 
-        return db.alterarEmprestimo(
-                emprestimoDTO.getId(),
-                emprestimoDTO.getHora(),
-                dataPrevistaDev,         // data_prevista_dev
-                dataDevolucao,           // data_devolucao
-                dataEmprestimo,          // data_emprestimo
-                emprestimoDTO.getFkExemplar(),
-                emprestimoDTO.getFkCliente(),
-                emprestimoDTO.getFkFuncionario()
-        );
+            Timestamp dataEmprestimo = dto.getDataEmprestimo() != null ?
+                    Timestamp.valueOf(dto.getDataEmprestimo()) : null;
+
+            return db.alterarEmprestimo(
+                    id,
+                    dataPrevistaDev,
+                    dataDevolucao,
+                    dataEmprestimo,
+                    dto.getFkExemplar(),
+                    dto.getFkCliente(),
+                    dto.getFkFuncionario()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erro ao atualizar empréstimo: " + e.getMessage();
+        }
     }
 
+    // Endpoint para listar empréstimos por cliente?
 }
-

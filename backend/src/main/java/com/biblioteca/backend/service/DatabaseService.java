@@ -1,5 +1,6 @@
 package com.biblioteca.backend.service;
 
+import com.biblioteca.backend.dto.EmprestimoDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -550,31 +551,35 @@ public class DatabaseService {
 
     // Insere um novo Empréstimo/Aluguel
 // (PK = id VARCHAR, atributos hora, data_prevista_dev, data_devolucao, data_emprestimo: TIME;
-//  FK para Exemplar e Cliente)
+//  FK para Exemplar e Cliente) CHANGE THIS LATER
     public String inserirEmprestimoAluga(
-            String id,
-            java.sql.Time      hora,
-            java.sql.Timestamp dataPrevistaDev,  // ← datetime
-            java.sql.Date      dataDevolucao,    // ← date
-            java.sql.Date      dataEmprestimo,   // ← date
-            String             fkExemplar,
-            String             fkCliente
-    ) {
+            Timestamp dataPrevistaDev,
+            java.sql.Date dataDevolucao,
+            Timestamp dataEmprestimo,
+            String fkExemplar,
+            String fkCliente,
+            String fkFuncionario) {
+
+        String id = "emp-" + UUID.randomUUID(); // gerar ID AQUI
+
         String sql = """
     INSERT INTO Emprestimo_aluga
-      (id, hora, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente)
+      (id, data_prevista_dev, data_devolucao, data_emprestimo, 
+       fk_exemplar, fk_cliente, fk_funcionario)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     """;
-        try (Connection c = DriverManager.getConnection(URL,USER,PASSWORD);
+
+        try (Connection c = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement s = c.prepareStatement(sql)) {
 
-            s.setString (1, id);
-            s.setTime   (2, hora);
-            s.setTimestamp(3, dataPrevistaDev);
-            s.setDate   (4, dataDevolucao);
-            s.setDate   (5, dataEmprestimo);
-            s.setString (6, fkExemplar);
-            s.setString (7, fkCliente);
+            s.setString(1, id);
+            s.setTimestamp(2, dataPrevistaDev);
+            s.setDate(3, dataDevolucao);
+            s.setTimestamp(4, dataEmprestimo);
+            s.setString(5, fkExemplar);
+            s.setString(6, fkCliente);
+            s.setString(7, fkFuncionario);
+
             s.executeUpdate();
             return "Empréstimo/Aluguel inserido com sucesso!";
         } catch(SQLException e) {
@@ -582,72 +587,38 @@ public class DatabaseService {
             return "Erro ao inserir Empréstimo/Aluguel: " + e.getMessage();
         }
     }
-    // Insere um novo registro em Altera
-// (PK composta por fk_funcionario e fk_emprestimo_aluga; data_alteracao TIMESTAMP)
-    public String inserirAltera(String fkFuncionario,
-                                String fkEmprestimoAluga,
-                                java.sql.Timestamp dataAlteracao) {
-        String sql = """
-        INSERT INTO Altera
-            (fk_funcionario, fk_emprestimo_aluga, data_alteracao)
-        VALUES (?, ?, ?)
-        """;
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setString(1, fkFuncionario);
-            stmt.setString(2, fkEmprestimoAluga);
-            stmt.setTimestamp(3, dataAlteracao);
-
-            stmt.executeUpdate();
-            return "Altera inserido com sucesso!";
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "Erro ao inserir altera: " + e.getMessage();
-        }
-    }
 
     public String alterarEmprestimo(
-            String idEmprestimo,
-            String hora,
-            java.sql.Date dataPrevistaDev,
+            String id,
+            Timestamp dataPrevistaDev,
             java.sql.Date dataDevolucao,
-            java.sql.Date dataEmprestimo,
+            Timestamp dataEmprestimo,
             String fkExemplar,
             String fkCliente,
             String fkFuncionario) {
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-
-            // Update the Emprestimo_aluga table
             String sqlUpdate = """
             UPDATE Emprestimo_aluga 
-            SET hora = ?, data_prevista_dev = ?, data_devolucao = ?, data_emprestimo = ?, 
-                fk_exemplar = ?, fk_cliente = ?
+            SET data_prevista_dev = ?, 
+                data_devolucao = ?, 
+                data_emprestimo = ?, 
+                fk_exemplar = ?, 
+                fk_cliente = ?,
+                fk_funcionario = ?
             WHERE id = ?;
-        """;
-            try (PreparedStatement stmt = connection.prepareStatement(sqlUpdate)) {
-                stmt.setString(1, hora);                  // Setting hora
-                stmt.setDate(2, dataPrevistaDev);          // Setting data_prevista_dev
-                stmt.setDate(3, dataDevolucao);            // Setting data_devolucao
-                stmt.setDate(4, dataEmprestimo);           // Setting data_emprestimo
-                stmt.setString(5, fkExemplar);             // Setting fk_exemplar
-                stmt.setString(6, fkCliente);              // Setting fk_cliente
-                stmt.setString(7, idEmprestimo);          // Identifying the record to update by id
-                stmt.executeUpdate();
-            }
+            """;
 
-            // Insert into Altera table to log the change
-            java.sql.Timestamp timestamp = new java.sql.Timestamp(System.currentTimeMillis());
-            String sqlAltera = """
-            INSERT INTO Altera
-                (fk_funcionario, fk_emprestimo_aluga, data_alteracao)
-            VALUES (?, ?, ?);
-        """;
-            try (PreparedStatement stmt = connection.prepareStatement(sqlAltera)) {
-                stmt.setString(1, fkFuncionario);         // Setting fk_funcionario
-                stmt.setString(2, idEmprestimo);          // fk_emprestimo_aluga
-                stmt.setTimestamp(3, timestamp);          // Setting data_alteracao (current timestamp)
+            try (PreparedStatement stmt = connection.prepareStatement(sqlUpdate)) {
+                stmt.setTimestamp(1, dataPrevistaDev);
+                stmt.setDate(2, dataDevolucao);
+                stmt.setTimestamp(3, dataEmprestimo);
+                stmt.setString(4, fkExemplar);
+                stmt.setString(5, fkCliente);
+                stmt.setString(6, fkFuncionario);  // Added funcionario field
+                stmt.setString(7, id);
+
                 stmt.executeUpdate();
             }
 
@@ -679,43 +650,97 @@ public class DatabaseService {
         }
     }
 
-    public List<String> listarEmprestimos() {
-        List<String> resultado = new ArrayList<>();
+    public List<EmprestimoDTO> listarEmprestimosDTO() {
+        List<EmprestimoDTO> emprestimos = new ArrayList<>();
         String sql = """
-            SELECT id,
-                   hora,
-                   data_prevista_dev,
-                   data_devolucao,
-                   data_emprestimo,
-                   fk_exemplar,
-                   fk_cliente
-              FROM Emprestimo_aluga
-            """;
+        SELECT id,
+               data_prevista_dev,
+               data_devolucao,
+               data_emprestimo,
+               fk_exemplar,
+               fk_cliente,
+               fk_funcionario
+        FROM Emprestimo_aluga
+    """;
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                String linha = String.format(
-                        "ID: %s, Hora: %s, Prevista: %s, Devolução: %s, Empréstimo: %s, Exemplar: %s, Cliente: %s",
-                        rs.getString("id"),
-                        rs.getTime("hora"),
-                        rs.getTime("data_prevista_dev"),
-                        rs.getTime("data_devolucao"),
-                        rs.getTime("data_emprestimo"),
-                        rs.getString("fk_exemplar"),
-                        rs.getString("fk_cliente")
-                );
-                resultado.add(linha);
+                EmprestimoDTO dto = new EmprestimoDTO();
+                dto.setId(rs.getString("id"));
+
+                // DATETIME -> LocalDateTime
+                Timestamp dataPrevistaDev = rs.getTimestamp("data_prevista_dev");
+                dto.setDataPrevistaDev(dataPrevistaDev != null ? dataPrevistaDev.toLocalDateTime() : null);
+
+                // DATE -> LocalDate
+                Date dataDevolucao = rs.getDate("data_devolucao");
+                dto.setDataDevolucao(dataDevolucao != null ? dataDevolucao.toLocalDate() : null);
+
+                // DATETIME -> LocalDateTime
+                Timestamp dataEmprestimo = rs.getTimestamp("data_emprestimo");
+                dto.setDataEmprestimo(dataEmprestimo != null ? dataEmprestimo.toLocalDateTime() : null);
+
+                dto.setFkExemplar(rs.getString("fk_exemplar"));
+                dto.setFkCliente(rs.getString("fk_cliente"));
+                dto.setFkFuncionario(rs.getString("fk_funcionario"));
+
+                emprestimos.add(dto);
             }
+
+            System.out.println("Total empréstimos retornados: " + emprestimos.size());
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return resultado;
+        return emprestimos;
     }
+
+
+    /*
+    public EmprestimoDTO buscarEmprestimoPorId(String id) {
+        String sql = """
+        SELECT id,
+               hora,
+               data_prevista_dev,
+               data_devolucao,
+               data_emprestimo,
+               fk_exemplar,
+               fk_cliente,
+               fk_funcionario
+          FROM Emprestimo_aluga
+         WHERE id = ?
+        """;
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    EmprestimoDTO dto = new EmprestimoDTO();
+                    dto.setId(rs.getString("id"));
+                    dto.setHora(rs.getTime("hora").toString());
+                    dto.setDataPrevistaDev(rs.getTimestamp("data_prevista_dev").toLocalDateTime());
+                    if (rs.getDate("data_devolucao") != null) {
+                        dto.setDataDevolucao(rs.getDate("data_devolucao").toLocalDate());
+                    }
+                    dto.setDataEmprestimo(rs.getDate("data_emprestimo").toLocalDate());
+                    dto.setFkExemplar(rs.getString("fk_exemplar"));
+                    dto.setFkCliente(rs.getString("fk_cliente"));
+                    dto.setFkFuncionario(rs.getString("fk_funcionario"));
+                    return dto;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+*/
 
     public List<String> listarEmprestimosPorCliente(String fkCliente) {
         List<String> resultado = new ArrayList<>();
@@ -785,5 +810,6 @@ public class DatabaseService {
             return "Erro ao deletar empréstimo: " + e.getMessage();
         }
     }
+
 
 }

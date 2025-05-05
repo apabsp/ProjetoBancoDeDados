@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase'; 
 import { Button } from '../ui/button';
 
-const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+const Register: React.FC = () => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log('User registered:', userCredential.user);
-      // Optionally redirect or show a success message here
-    } catch (err) {
+      
+    } catch (err:any) { // Dunno what kinda error I might get
       setError(err.message);
     }
   };
@@ -24,7 +24,6 @@ const Register = () => {
   return (  
     
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <Button>ESSE É O MEU BUTTON!! OI</Button>
       <div className="w-full max-w-md bg-white p-8 rounded shadow">
         <h2 className="text-2xl font-bold mb-6 text-center">Create an Account</h2>
 
