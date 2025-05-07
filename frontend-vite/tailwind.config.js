@@ -7,8 +7,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Oswald', 'sans-serif']
-      }
+        sans: ['Jost', 'sans-serif'], // Altere a fonte padrão para Jost
+      },
+      colors: {
+        'custom-gray': '#E3E3E3', // Sua cor personalizada
+      },
     },
   },
   plugins: [],

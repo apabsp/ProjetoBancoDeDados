@@ -20,7 +20,7 @@ public class DatabaseService {
 
     private static final String URL = "jdbc:mysql://localhost:3306/biblioteca";
     private static final String USER = "root";
-    private static final String PASSWORD = "12345";
+    private static final String PASSWORD = "salamandraRadical29!";
 
 
     // Method to execute SQL script (like schema.sql)

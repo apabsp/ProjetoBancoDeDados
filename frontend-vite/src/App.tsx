@@ -1,53 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import { Button } from './components/ui/button'
-import { app } from "./firebase";
-import { getAuth } from "firebase/auth"; 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Register from './components/user/register'
+import Register from './components/user/register';
 import Login from './components/user/Login';
-import EmprestimoTable from './components/tables/EmprestimoTable'
-import AddEmprestimoButton from './components/AddEmprestimoButton'
-function App() {
-  
+import AddEmprestimoButton from './components/AddEmprestimoButton';
+import Exemplar from './components/Exemplar';
 
+function App() {
   return (
     <>
-      <header className="w-screen flex bg-blue-500 p-4 justify-center">
-          <h1 className="text-3xl font-bold text-white oswald text-3x1">
-            Bibliotecapp!
-          </h1>
+      <header className="w-screen h-24 flex bg-gray-200 p-4 justify-evenly items-center fixed top-0 left-0 z-10">
+        <p className="text-3xl font-medium text-black Jost">Materiais</p>
+        <p className="text-3xl font-medium text-black Jost">Clientes</p>
+        <p className="text-3xl font-medium text-black Jost">Funcionários</p>
       </header>
 
-        <Router>
+      <Router>
         <Routes>
           <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login/>}/>
+          <Route path="/login" element={<Login />} />
         </Routes>
-        </Router>
+      </Router>
 
-      <div className="flex flex-col justify-center w-3/4 mx-auto">
-        <div className="flex justify-between">
-          <Button variant="outline">Empréstimos</Button>
-          <Button variant="outline">Obras</Button>
-          <Button variant="outline">Autores</Button>
-          <Button variant="outline">Clientes</Button>
-          <Button variant="outline">Funcionários</Button>
-        </div>
-        
-        <EmprestimoTable/>
-
-        <div className=  "flex justify-between">
-          <AddEmprestimoButton/>
+      <div className="h-screen w-screen grid grid-cols-5 gap-4 m-6 mt-32">
+        <div className="col-start-2 col-span-3">
+          <Exemplar />
         </div>
       </div>
-        
-
-    
     </>
   )
 }
 
-export default App
+export default App;
