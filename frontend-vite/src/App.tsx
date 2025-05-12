@@ -1,9 +1,7 @@
 import './App.css'
 import { SetStateAction, useState } from 'react';
-import Register from './components/user/register';
-import Login from './components/user/Login';
-import AddEmprestimoButton from './components/AddEmprestimoButton';
 import Exemplar from './components/Exemplar';
+import Emprestimo from './components/Emprestimo';
 
 function App() {
   // Criação de um estado para controlar o componente a ser exibido
@@ -44,10 +42,9 @@ function App() {
 
       <div className="h-screen w-screen grid grid-cols-5 gap-4 m-6 mt-32">
         <div className="col-start-2 col-span-3">
-          {/* Renderiza o componente de acordo com o estado */}
           {activeComponent === 'materiais' && <Exemplar />}
-          {activeComponent === 'clientes' && <div>Componente de Clientes</div>} {/* Substitua com o componente de clientes */}
-          {activeComponent === 'funcionarios' && <div>Componente de Funcionários</div>} {/* Substitua com o componente de funcionários */}
+          {activeComponent === 'clientes' && <div><Emprestimo/></div>}
+          {activeComponent === 'funcionarios' && <div>Em construção</div>}
         </div>
       </div>
     </>
