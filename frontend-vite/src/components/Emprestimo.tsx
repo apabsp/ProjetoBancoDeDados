@@ -3,6 +3,7 @@ import { Input } from "./ui/input";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 export function Emprestimo() {
   // Estado para controlar o conteúdo que será exibido e o botão ativo
@@ -21,7 +22,31 @@ export function Emprestimo() {
                 <Search size={20} className="text-black" />
               </Button>
             </div>
-            <p>retornar tabela</p>
+            <div className="m-5"><Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead >ID</TableHead>
+                  <TableHead>Hoarário do emprestimo</TableHead>
+                  <TableHead>Data do emprestimo</TableHead>
+                  <TableHead>Data prevista da devolução</TableHead>
+                  <TableHead>Data da devolução</TableHead>
+                  <TableHead>ID Exemplar / Nome</TableHead>
+                  <TableHead>ID Cliente / Nome</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">1234</TableCell>
+                  <TableCell>12:46</TableCell>
+                  <TableCell>22/04/2025</TableCell>
+                  <TableCell>02/05/2025</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>1A2B Exemplar 1</TableCell>
+                  <TableCell>3C4D Cliente 1</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            </div>
           </div>
         );
       case "inserir":
@@ -94,7 +119,7 @@ export function Emprestimo() {
               </Button>
             </div>
             <div className="flex justify-end m-4 mb-2">
-              <Button className="p-4 bg-gray-200 hover:bg-gray-300 text-black">Salvar</Button>
+              <Button className="p-4 bg-gray-200 hover:bg-gray-300 text-black">Deletar</Button>
             </div>
           </div>
         );
