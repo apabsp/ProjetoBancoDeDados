@@ -1,9 +1,11 @@
-import { Button } from "./ui/button";
+
 import { Input } from "./ui/input";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import InserirEmprestimo from "./InserirEmprestimo";
+import { Button } from "./ui/button";
 
 export function Emprestimo() {
   // Estado para controlar o conteúdo que será exibido e o botão ativo
@@ -51,25 +53,7 @@ export function Emprestimo() {
         );
       case "inserir":
         return (
-          <div className="gap-5">
-            <div className="flex flex-col items-center m-5 mb-1 gap-4">
-              <div className="flex flex-col items-start w-full gap-2">
-                <p className="text-xl ml-2">Exemplar</p>
-                <Input placeholder="Digite o id do exemplar" className="mr-2 placeholder:text-xl" />
-              </div>
-              <div className="flex flex-col items-start w-full gap-2">
-                <p className="text-xl ml-2">Cliente</p>
-                <Input placeholder="Digite id do cliente" className="mr-2 placeholder:text-xl" />
-              </div>
-              <div className="flex flex-col items-start w-full gap-2">
-                <p className="text-xl ml-2">Data prevista da devolução</p>
-                <Input placeholder="Digite a data prevista de devolução 'dd-mm-aaaa'" className="mr-2 placeholder:text-xl" />
-              </div>
-            </div>
-            <div className="flex justify-end m-4 mb-2">
-              <Button className="p-4 bg-gray-200 hover:bg-gray-300 text-black">Salvar</Button>
-            </div>
-          </div>
+          <InserirEmprestimo/>
         );
       case "atualizar":
         return (
@@ -92,16 +76,27 @@ export function Emprestimo() {
                 </div>
                 <div className="flex flex-col items-start w-full gap-2">
                   <p className="text-xl ml-2">Data do empréstimo</p>
-                  <Input placeholder="Digite a data do empréstimo 'dd-mm-aaaa'" className="mr-2 placeholder:text-xl" />
+                  <Input
+                    type="datetime-local"
+                    placeholder="Digite a data do empréstimo 'dd-mm-aaaa'"
+                    className="mr-2 placeholder:text-xl"
+                  />
                 </div>
                 <div className="flex flex-col items-start w-full gap-2">
                   <p className="text-xl ml-2">Data prevista da devolução</p>
-                  <Input placeholder="Digite a data prevista de devolução 'dd-mm-aaaa'" className="mr-2 placeholder:text-xl" />
+                  <Input
+                    type="datetime-local"
+                    placeholder="Digite a data prevista de devolução 'dd-mm-aaaa'"
+                    className="mr-2 placeholder:text-xl"
+                  />
                 </div>
                 <div className="flex flex-col items-start w-full gap-2">
                   <p className="text-xl ml-2">Data da devolução</p>
-                  <Input placeholder="Digite a data de devolução 'dd-mm-aaaa'" className="mr-2 placeholder:text-xl" />
-                </div>
+                  <Input
+                    type="datetime-local"
+                    placeholder="Digite a data prevista de devolução 'dd-mm-aaaa'"
+                    className="mr-2 placeholder:text-xl"
+                  /></div>
               </div>
               <div className="flex justify-end m-4 mb-2">
                 <Button className="p-4 bg-gray-200 hover:bg-gray-300 text-black">Salvar</Button>
