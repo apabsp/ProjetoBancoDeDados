@@ -34,13 +34,9 @@ public class EmprestimoController {
                     ? Timestamp.valueOf(dto.getDataPrevistaDev())
                     : null;
 
-            Date dataDevolucao = dto.getDataDevolucao() != null
-                    ? Date.valueOf(dto.getDataDevolucao())
-                    : null;
-
             return db.inserirEmprestimoAluga(
                     dataPrevistaDev,
-                    dataDevolucao,
+                    null, // quero que dataDevolucao seja null por padrão. Não faz sentido inserir com a devolução já feita. Deixar isso para o alterar
                     dataEmprestimo,
                     dto.getFkExemplar(),
                     dto.getFkCliente(),
