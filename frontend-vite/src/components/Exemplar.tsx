@@ -16,7 +16,7 @@ export function Exemplar() {
           <AccordionTrigger className="text-3xl font-medium text-black Jost">Exemplar</AccordionTrigger>
           <AccordionContent className="bg-gray-100 rounded p-3">
             <div className="flex justify-evenly">
-              <Button className="bg-gray-200 text-black text-2xl p-7 hover:bg-gray-300">Vizualizar</Button>
+              <Button className="bg-gray-200 text-black text-2xl p-7 hover:bg-gray-300">Visualizar</Button>
               <Button className="bg-gray-200 text-black text-2xl p-7 hover:bg-gray-300">Inserir</Button>
               <Button className="bg-gray-200 text-black text-2xl p-7 hover:bg-gray-300">Atualizar</Button>
               <Button className="bg-gray-200 text-black text-2xl p-7 hover:bg-gray-300">Deletar</Button>
