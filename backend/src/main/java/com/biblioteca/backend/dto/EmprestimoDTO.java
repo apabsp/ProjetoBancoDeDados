@@ -14,10 +14,20 @@ public class EmprestimoDTO {
     private String fkExemplar;
     private String fkCliente;
     private String fkFuncionario;
+    private String nomeExemplar;
+    private String nomeCliente;
 
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
+
+    public void setNomeExemplar(String nomeExemplar) {
+        this.nomeExemplar = nomeExemplar;
+    }
 
     public LocalDateTime getDataPrevistaDev() { return dataPrevistaDev; }
     public void setDataPrevistaDev(LocalDateTime dataPrevistaDev) {
@@ -47,5 +57,13 @@ public class EmprestimoDTO {
     public String getFkFuncionario() { return fkFuncionario; }
     public void setFkFuncionario(String fkFuncionario) {
         this.fkFuncionario = fkFuncionario;
+    }
+
+    public String getNomeExemplar() {
+        return nomeExemplar;
+    }
+
+    public String getNomeCliente() {
+        return nomeCliente;
     }
 }

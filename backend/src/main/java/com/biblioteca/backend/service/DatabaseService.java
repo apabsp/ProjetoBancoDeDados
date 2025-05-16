@@ -18,9 +18,9 @@ import java.sql.SQLException;
 @Service
 public class DatabaseService {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/biblioteca";
+    private static final String URL = "jdbc:mysql://localhost:3306/biblioteca"; // jdbc is necessary for the protocol identifier
     private static final String USER = "root";
-    private static final String PASSWORD = "salamandraRadical29!";
+    private static final String PASSWORD = "12345";
 
 
     // Method to execute SQL script (like schema.sql)
@@ -652,15 +652,32 @@ public class DatabaseService {
 
     public List<EmprestimoDTO> listarEmprestimosDTO() {
         List<EmprestimoDTO> emprestimos = new ArrayList<>();
+
         String sql = """
-        SELECT id,
-               data_prevista_dev,
-               data_devolucao,
-               data_emprestimo,
-               fk_exemplar,
-               fk_cliente,
-               fk_funcionario
-        FROM Emprestimo_aluga
+        SELECT ea.id,
+               ea.data_prevista_dev,
+               ea.data_devolucao,
+               ea.data_emprestimo,
+               ea.fk_exemplar,
+               ea.fk_cliente,
+               ea.fk_funcionario,
+               COALESCE(ob_livro.titulo, ob_artigo.titulo) AS nome_exemplar,
+               p.nome AS nome_cliente
+        FROM Emprestimo_aluga ea
+        JOIN Exemplar ex ON ea.fk_exemplar = ex.id
+
+        -- Livro
+        LEFT JOIN Edicao ed ON ex.fk_edicao = ed.id
+        LEFT JOIN Livro l ON ed.livro_cod_barras = l.fk_Obra_cod_barras
+        LEFT JOIN Obra ob_livro ON l.fk_Obra_cod_barras = ob_livro.cod_barras
+
+        -- Artigo
+        LEFT JOIN Artigo a ON ex.fk_artigo = a.id
+        LEFT JOIN Obra ob_artigo ON a.fk_Obra_cod_barras = ob_artigo.cod_barras
+
+        -- Cliente
+        JOIN Cliente c ON ea.fk_cliente = c.id
+        JOIN Pessoa p ON c.fk_Pessoa_id = p.id
     """;
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -684,7 +701,11 @@ public class DatabaseService {
                 dto.setDataEmprestimo(dataEmprestimo != null ? dataEmprestimo.toLocalDateTime() : null);
 
                 dto.setFkExemplar(rs.getString("fk_exemplar"));
+                dto.setNomeExemplar(rs.getString("nome_exemplar"));
+
                 dto.setFkCliente(rs.getString("fk_cliente"));
+                dto.setNomeCliente(rs.getString("nome_cliente"));
+
                 dto.setFkFuncionario(rs.getString("fk_funcionario"));
 
                 emprestimos.add(dto);
@@ -698,6 +719,7 @@ public class DatabaseService {
 
         return emprestimos;
     }
+
 
 
     /*
