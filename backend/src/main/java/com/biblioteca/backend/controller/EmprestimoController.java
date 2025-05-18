@@ -48,6 +48,10 @@ public class EmprestimoController {
         }
     }
 
+    @GetMapping("/visualizar/{id}")
+    public EmprestimoDTO visualizarEmprestimoPorId(@PathVariable String id) {
+        return db.buscarEmprestimoPorId(id);
+    }
 
 
 
