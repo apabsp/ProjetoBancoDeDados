@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import InserirEmprestimo from "./InserirEmprestimo";
 import { Button } from "./ui/button";
 import AtualizarEmprestimo from "./AtualizarEmprestimo";
+import DeletarEmprestimo from "./DeletarEmprestimo";
 
 export function Emprestimo() {
   // Estado para controlar o conteúdo que será exibido e o botão ativo
@@ -76,19 +77,7 @@ export function Emprestimo() {
       case "atualizar":
         return <AtualizarEmprestimo />;
       case "deletar":
-        return (
-          <div className="gap-5">
-            <div className="flex items-center m-5 mb-1">
-              <Input placeholder="Digite o id do empréstimo" className="mr-2 placeholder:text-xl" />
-              <Button className="p-2 bg-gray-200 hover:bg-gray-300">
-                <Search size={20} className="text-black" />
-              </Button>
-            </div>
-            <div className="flex justify-end m-4 mb-2">
-              <Button className="p-4 bg-gray-200 hover:bg-gray-300 text-black">Deletar</Button>
-            </div>
-          </div>
-        );
+        return <DeletarEmprestimo />;
       default:
         return null;
     }

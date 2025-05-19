@@ -172,3 +172,11 @@ INSERT IGNORE INTO Exemplar (
   ('ex1', 'ed1', 'art1', 'A', '01'),
   ('ex2', 'ed1', 'art1', 'A', '02'),
   ('ex3', 'ed1', 'art1', 'B', '01');
+
+INSERT INTO Emprestimo_aluga (id, data_prevista_dev, data_devolucao, data_emprestimo, fk_exemplar, fk_cliente, fk_funcionario)
+VALUES
+('emp002', '2025-06-01 10:00:00', NULL, '2025-05-15 09:00:00', 'exemplar001', 'cliente001', 'funcionario001'),
+
+('emp003', '2025-06-05 14:00:00', NULL, '2025-05-16 11:30:00', 'exemplar001', 'cliente001', 'funcionario001'),
+
+('emp004', '2025-06-10 16:00:00', NULL, '2025-05-17 15:00:00', 'exemplar001', 'cliente001', 'funcionario001');
