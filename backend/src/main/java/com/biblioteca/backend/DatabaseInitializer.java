@@ -14,6 +14,7 @@ public class DatabaseInitializer {
 
     @PostConstruct // Este método será chamado automaticamente após o Spring iniciar o contexto
     public void init() {
+        /*
         System.out.println("Iniciando criação das tabelas...");
 
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
@@ -128,5 +129,6 @@ public class DatabaseInitializer {
             System.err.println("Erro ao criar as tabelas:");
             e.printStackTrace();
         }
+        */
     }
 }
