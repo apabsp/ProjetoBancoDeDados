@@ -33,7 +33,7 @@ export function Obra() {
       .then((data: Obra[] | { content: Obra[] }) => {
         const obrasData = Array.isArray(data) ? data : 
                          Array.isArray(data?.content) ? data.content : [];
-        setObras(obrasData);
+        setObras(obrasData); // Só um verificador para aceitar tanto o content quanto o objeto
       })
       .catch(error => {
         console.error("Erro ao buscar obras:", error);
@@ -106,10 +106,12 @@ export function Obra() {
           </div>
         );
 
-        /*
+        
       case "inserir":
         return <InserirObra />;
+        /*
       case "atualizar":
+
         return <AtualizarObra />;
       case "deletar":
         return <DeletarObra />;

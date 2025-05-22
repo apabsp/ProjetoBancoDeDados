@@ -3,11 +3,21 @@ package com.biblioteca.backend.dto;
 import java.sql.Date;
 
 public class ObraDTO {
+    private String cod_barras;  // ID da obra
     private String titulo;
-    private Date ano;  // Keep as java.sql.Date to store the full date
-    private String genero;
+    private Date ano_lanc;
 
-    // Getters and Setters
+    // Getters e Setters
+    public String getCod_barras() {
+        return cod_barras;
+    }
+
+
+
+    public void setCod_barras(String cod_barras) {
+        this.cod_barras = cod_barras;
+    }
+
     public String getTitulo() {
         return titulo;
     }
@@ -16,20 +26,18 @@ public class ObraDTO {
         this.titulo = titulo;
     }
 
-    public Date getAno() {
-        return ano;
+    public Date getAno_lanc() {
+        return ano_lanc;
     }
 
-    // Setter: Convert the String to Date
-    public void setAno(String ano) {
-        this.ano = Date.valueOf(ano);  // Convert from String (e.g., "2000-06-16") to java.sql.Date
+    public void setAno_lanc(Date ano_lanc) {
+        this.ano_lanc = ano_lanc;
     }
 
-    public String getGenero() {
-        return genero;
+    // Alternativamente, se quiser setar a data por String:
+    /*
+    public void setAno_lanc(String ano_lanc) {
+        this.ano_lanc = Date.valueOf(ano_lanc);
     }
-
-    public void setGenero(String genero) {
-        this.genero = genero;
-    }
+    */
 }

@@ -2,6 +2,7 @@ package com.biblioteca.backend.service;
 
 import com.biblioteca.backend.dto.EmprestimoDTO;
 import com.biblioteca.backend.dto.ExemplarDTO;
+import com.biblioteca.backend.dto.ObraDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -132,53 +133,23 @@ public class DatabaseService {
     }
 
     // Method to insert a new "Obra"
-    public String inserirObra(String titulo, java.sql.Date ano, String genero) {
-            try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                String codBarras = UUID.randomUUID().toString();
+    public String inserirObra(String codBarras, String titulo, java.sql.Date ano) {
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
 
-                // 1) se veio um gênero, garanta que ele exista em Genero
-                if (genero != null && !genero.trim().isEmpty()) {
-                    String sqlFind = "SELECT nome FROM Genero WHERE nome = ?";
-                    try (PreparedStatement psFind = connection.prepareStatement(sqlFind)) {
-                        psFind.setString(1, genero.trim());
-                        try (ResultSet rs = psFind.executeQuery()) {
-                            if (!rs.next()) {
-                                String sqlInsertGen = "INSERT INTO Genero(nome) VALUES(?)";
-                                try (PreparedStatement psInsertGen = connection.prepareStatement(sqlInsertGen)) {
-                                    psInsertGen.setString(1, genero.trim());
-                                    psInsertGen.executeUpdate();
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 2) monta o INSERT em Obra incluindo o campo genero somente se tiver vindo
-                String baseSql =
-                        "INSERT INTO Obra (cod_barras, titulo, ano_lanc" +
-                                (genero != null && !genero.trim().isEmpty() ? ", genero" : "") +
-                                ") VALUES (?, ?, ?" +
-                                (genero != null && !genero.trim().isEmpty() ? ", ?" : "") +
-                                ")";
-                try (PreparedStatement stmt = connection.prepareStatement(baseSql)) {
-                    int idx = 1;
-                    stmt.setString(idx++, codBarras);
-                    stmt.setString(idx++, titulo);
-                    stmt.setDate(idx++, ano);
-
-                    if (genero != null && !genero.trim().isEmpty()) {
-                        stmt.setString(idx, genero.trim());
-                    }
-
-                    stmt.executeUpdate();
-                    return "Obra inserida com sucesso!";
-                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return "Erro ao inserir obra: " + e.getMessage();
+            String sql = "INSERT INTO Obra (cod_barras, titulo, ano_lanc) VALUES (?, ?, ?)";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setString(1, codBarras);
+                stmt.setString(2, titulo);
+                stmt.setDate(3, ano);
+                stmt.executeUpdate();
+                return "Obra inserida com sucesso!";
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao inserir obra: " + e.getMessage();
         }
+    }
 
     // Still need to work on this one
     public String deletarObraPorTitulo(String titulo) {
@@ -240,25 +211,28 @@ public class DatabaseService {
     }
 
     // Method to select all "Obras"
-    public String visualizarObras() {
+    public List<ObraDTO> visualizarObras() {
+        List<ObraDTO> obras = new ArrayList<>();
+
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String sql = "SELECT * FROM Obra";
+            String sql = "SELECT * FROM obra";
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 var resultSet = stmt.executeQuery();
 
-                StringBuilder result = new StringBuilder();
+                //StringBuilder result = new StringBuilder(); My old implementation
                 while (resultSet.next()) {
-                    result.append("Cod Barras: ").append(resultSet.getString("cod_barras"))
-                            .append(", Titulo: ").append(resultSet.getString("titulo"))
-                            .append(", Ano: ").append(resultSet.getDate("ano_lanc"))
-                            .append("\n");
+                    ObraDTO obra = new ObraDTO();
+                    obra.setCod_barras(resultSet.getString("cod_barras"));
+                    obra.setTitulo(resultSet.getString("titulo"));
+                    obra.setAno_lanc(resultSet.getDate("ano_lanc") != null ? resultSet.getDate("ano_lanc") : null);
+                    obras.add(obra);
                 }
-                return result.toString();
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return "Erro ao visualizar obras: " + e.getMessage();
+            System.out.println("Problema ao visualizarObras!");
         }
+        return obras; // Returning the whoooole list
     }
 
     public String vincularObraAEditora(String codBarras, String idEditora) {

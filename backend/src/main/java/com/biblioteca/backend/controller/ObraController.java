@@ -1,9 +1,23 @@
 package com.biblioteca.backend.controller;
 
-import com.biblioteca.backend.dto.ObraDTO;
-import org.springframework.web.bind.annotation.*;
+import com.biblioteca.backend.dto.EmprestimoDTO;
 import com.biblioteca.backend.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.Timestamp;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.UUID; // Randomizer
+import com.biblioteca.backend.dto.ObraDTO;
+import com.biblioteca.backend.service.DatabaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/obra")
@@ -14,62 +28,25 @@ public class ObraController {
 
     @PostMapping("/inserir")
     public String inserirObra(@RequestBody ObraDTO obraDTO) {
-        // ano is already converted to Date in ObraDTO, just pass it along
-        return databaseService.inserirObra(obraDTO.getTitulo(), obraDTO.getAno(), obraDTO.getGenero());
+        String id = obraDTO.getCod_barras();
+        String titulo = obraDTO.getTitulo();
+        Date anoLanc = obraDTO.getAno_lanc();
+        return databaseService.inserirObra(id,titulo, anoLanc);
     }
+    /*
+        @DeleteMapping("/deletarPorCodBarras")
+        public String deletarObraPorCodBarras(@RequestParam String cod_barras) {
+            return databaseService.deletarObraPorCodBarras(cod_barras);
+        }
 
-    @DeleteMapping("/deletarPorTitulo")
-    public String deletarObraPorTitulo(@RequestParam String titulo) {
-        return databaseService.deletarObraPorTitulo(titulo);
-    }
-
-    @DeleteMapping("/deletar/{id}")
-    public String deletarObra(@PathVariable Long id) {
-        return databaseService.deletarObra(id);
-    }
-
-    @PutMapping("/atualizar/{id}")
-    public String atualizarObra(@PathVariable Long id, @RequestBody ObraDTO obraDTO) {
-        return databaseService.atualizarObra(id, obraDTO.getTitulo(), obraDTO.getAno(), obraDTO.getGenero());
-    }
-
+        @PutMapping("/atualizar/{cod_barras}")
+        public String atualizarObra(@PathVariable String cod_barras, @RequestBody ObraDTO obraDTO) {
+            return databaseService.atualizarObra(cod_barras, obraDTO.getTitulo(), obraDTO.getAno_lanc());
+        }
+        */
     @GetMapping("/visualizar")
-    public String visualizarObras() {
+    public List<ObraDTO> visualizarObras() {
+        System.out.println("📥 GET /api/obra/visualizar was called");
         return databaseService.visualizarObras();
     }
 }
-
-
-/*
-@RestController
-public class ObraController {
-
-    private final String url = "jdbc:mysql://localhost:3306/biblioteca";
-    private final String user = "root";
-    private final String password = "12345";
-
-    @PostMapping("/api/obra/inserir")
-    public ResponseEntity<String> inserirObra(@RequestBody ObraDTO obra) {
-        try (Connection conn = DriverManager.getConnection(url, user, password)) {
-            String script = Files.readString(Paths.get("src/main/resources/scripts/script-inserir-obra.sql"));
-
-            script = script.replace("${titulo}", obra.getTitulo())
-                    .replace("${ano}", obra.getAno())
-                    .replace("${genero}", obra.getGenero());
-
-            Statement stmt = conn.createStatement();
-            for (String linha : script.split(";")) {
-                if (!linha.trim().isEmpty()) {
-                    stmt.executeUpdate(linha.trim());
-                }
-            }
-
-            return ResponseEntity.ok("Obra inserida com sucesso!");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Erro ao inserir obra: " + e.getMessage());
-        }
-    }
-}
-*/
-
