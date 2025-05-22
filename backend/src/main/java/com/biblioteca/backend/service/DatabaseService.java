@@ -1,6 +1,7 @@
 package com.biblioteca.backend.service;
 
 import com.biblioteca.backend.dto.EmprestimoDTO;
+import com.biblioteca.backend.dto.ExemplarDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -449,27 +450,85 @@ public class DatabaseService {
         }
     }
 
-    // Insere um novo Exemplar (PK = id; FK para edição ou artigo, e FK para estante)
-    public String inserirExemplar(String idExemplar,
-                                  String fkEdicao,    // pode ser null se for artigo
-                                  String fkArtigo,    // pode ser null se for edição
-                                  String fkEstante) {
-        String sql = """
-        INSERT INTO Exemplar
-            (id, fk_edicao, fk_artigo, fk_estante)
-        VALUES (?, ?, ?, ?)
-        """;
+    public ExemplarDTO buscarExemplarPorId(String id) {
+        String sql = "SELECT id, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero " +
+                "FROM Exemplar WHERE id = ?";
+
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    ExemplarDTO exemplar = new ExemplarDTO();
+                    exemplar.setId(rs.getString("id"));
+                    exemplar.setFkEdicao(rs.getString("fk_edicao"));
+                    exemplar.setFkArtigo(rs.getString("fk_artigo"));
+                    exemplar.setFkEstantePrateleira(rs.getString("fk_estante_prateleira"));
+                    exemplar.setFkEstanteNumero(rs.getString("fk_estante_numero"));
+                    return exemplar;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // Return null if not found or error occurs
+    }
+
+    public List<ExemplarDTO> listarExemplares() { // provavelmente não funciona
+        List<ExemplarDTO> exemplares = new ArrayList<>();
+
+        String sql = "SELECT id, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero FROM Exemplar";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                ExemplarDTO exemplar = new ExemplarDTO();
+                exemplar.setId(rs.getString("id"));
+                exemplar.setFkEdicao(rs.getString("fk_edicao"));
+                exemplar.setFkArtigo(rs.getString("fk_artigo"));
+                exemplar.setFkEstantePrateleira(rs.getString("fk_estante_prateleira"));
+                exemplar.setFkEstanteNumero(rs.getString("fk_estante_numero"));
+
+                exemplares.add(exemplar);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return exemplares;
+    }
+
+    // Insere um novo Exemplar (PK = id; FK para edição ou artigo, e FK para estante)
+    public String inserirExemplar(String idExemplar, ExemplarDTO dto) {
+        String sql = """
+        INSERT INTO Exemplar
+            (id, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero)
+        VALUES (?, ?, ?, ?, ?)
+    """;
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setString(1, idExemplar);
-            // se for null, o JDBC vai inserir NULL
-            if (fkEdicao != null) stmt.setString(2, fkEdicao);
-            else               stmt.setNull(2, Types.VARCHAR);
 
-            if (fkArtigo != null) stmt.setString(3, fkArtigo);
-            else                 stmt.setNull(3, Types.VARCHAR);
+            if (dto.getFkEdicao() != null && !dto.getFkEdicao().isEmpty()) {
+                stmt.setString(2, dto.getFkEdicao());
+            } else {
+                stmt.setNull(2, Types.VARCHAR);
+            }
 
-            stmt.setString(4, fkEstante);
+            if (dto.getFkArtigo() != null && !dto.getFkArtigo().isEmpty()) {
+                stmt.setString(3, dto.getFkArtigo());
+            } else {
+                stmt.setNull(3, Types.VARCHAR);
+            }
+
+            stmt.setString(4, dto.getFkEstantePrateleira());
+            stmt.setString(5, dto.getFkEstanteNumero());
+
             stmt.executeUpdate();
             return "Exemplar inserido com sucesso!";
         } catch (SQLException e) {
@@ -477,6 +536,61 @@ public class DatabaseService {
             return "Erro ao inserir exemplar: " + e.getMessage();
         }
     }
+
+
+
+    public String alterarExemplar(String id, ExemplarDTO dto) {
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            String sqlUpdate = """
+        UPDATE Exemplar 
+        SET fk_edicao = ?, 
+            fk_artigo = ?, 
+            fk_estante_prateleira = ?, 
+            fk_estante_numero = ?
+        WHERE id = ?;
+        """;
+
+            try (PreparedStatement stmt = connection.prepareStatement(sqlUpdate)) {
+                stmt.setString(1, dto.getFkEdicao());
+                stmt.setString(2, dto.getFkArtigo());
+                stmt.setString(3, dto.getFkEstantePrateleira());
+                stmt.setString(4, dto.getFkEstanteNumero());
+                stmt.setString(5, id);
+
+                int rowsAffected = stmt.executeUpdate();
+
+                if (rowsAffected == 0) {
+                    return "Nenhum exemplar encontrado com o ID fornecido.";
+                }
+            }
+
+            return "Exemplar atualizado com sucesso!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao atualizar exemplar: " + e.getMessage();
+        }
+    }
+
+    public String deletarExemplar(String id) {
+        String sql = "DELETE FROM Exemplar WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, id);
+            int rowsAffected = stmt.executeUpdate();
+
+            return rowsAffected > 0
+                    ? "Exemplar deletado com sucesso!"
+                    : "Nenhum exemplar encontrado com o ID: " + id;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar exemplar: " + e.getMessage();
+        }
+    }
+
+
     // Insere um novo Telefone (PK = telefone_PK, atributo telefone como INT)
     public String inserirTelefone(String telefonePK, int telefone) {
         String sql = "INSERT INTO Telefone (telefone_PK, telefone) VALUES (?, ?)";

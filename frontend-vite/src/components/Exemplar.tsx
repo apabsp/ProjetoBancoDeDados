@@ -31,14 +31,13 @@ export function Exemplar() {
                     <TableHead>ID</TableHead>
                     <TableHead>Edição</TableHead>
                     <TableHead>Artigo</TableHead>
-                    <TableHead>Título</TableHead>
                     <TableHead>Estante (Prateleira / Número)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {exemplares.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center">
+                      <TableCell colSpan={4} className="text-center">
                         Nenhum exemplar encontrado
                       </TableCell>
                     </TableRow>
@@ -48,7 +47,6 @@ export function Exemplar() {
                         <TableCell className="font-medium">{exemplar.id}</TableCell>
                         <TableCell>{exemplar.fkEdicao}</TableCell>
                         <TableCell>{exemplar.fkArtigo}</TableCell>
-                        <TableCell>{exemplar.tituloArtigo}</TableCell>
                         <TableCell>{exemplar.fkEstantePrateleira} / {exemplar.fkEstanteNumero}</TableCell>
                       </TableRow>
                     ))

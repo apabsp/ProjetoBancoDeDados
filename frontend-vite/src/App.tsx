@@ -2,6 +2,8 @@ import './App.css'
 import { SetStateAction, useState } from 'react';
 import Exemplar from './components/Exemplar';
 import Emprestimo from './components/Emprestimo';
+import Obra from './components/ObraComponents/Obra';
+//import { Edicao } from './components/EdicaoComponents/Edicao';
 
 function App() {
   // Criação de um estado para controlar o componente a ser exibido
@@ -42,7 +44,8 @@ function App() {
 
       <div className="h-screen w-screen grid grid-cols-5 gap-4 m-6 mt-32">
         <div className="col-start-2 col-span-3">
-          {activeComponent === 'materiais' && <Exemplar />}
+          {activeComponent === 'materiais' && <div className='g-4'><Exemplar /></div>}
+          {activeComponent === 'materiais' && <div><Obra/></div>}
           {activeComponent === 'clientes' && <div><Emprestimo/></div>}
           {activeComponent === 'funcionarios' && <div>Em construção</div>}
         </div>
