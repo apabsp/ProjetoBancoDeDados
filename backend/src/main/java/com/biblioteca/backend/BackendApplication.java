@@ -21,5 +21,6 @@ public class BackendApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         dbService.executarScript("/scripts/schema.sql");
+        dbService.executarScript("/scripts/triggersEProcedures.sql");
     }
 }

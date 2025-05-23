@@ -1184,4 +1184,23 @@ public class DatabaseService {
             }
         }
     }
+
+    public Integer calcularDiasAteDevolucao(String idEmprestimo) {
+        String sql = "SELECT dias_ate_devolucao(?)";
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, idEmprestimo);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

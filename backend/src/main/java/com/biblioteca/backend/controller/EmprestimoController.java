@@ -20,6 +20,18 @@ public class EmprestimoController {
     @Autowired
     private DatabaseService db;
 
+    @GetMapping("/dias-ate-devolucao")
+    public String getDiasAteDevolucao(@RequestParam String idEmprestimo) {
+        try {
+            Integer dias = db.calcularDiasAteDevolucao(idEmprestimo);
+            return dias != null ? dias.toString() : "Empréstimo não encontrado";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erro ao calcular dias até devolução: " + e.getMessage();
+        }
+    }
+
+
     // Endpoint para inserir um novo empréstimo
     @PostMapping("/inserir")
     public String inserirEmprestimo(@RequestBody EmprestimoDTO dto) {
