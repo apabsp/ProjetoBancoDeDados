@@ -50,6 +50,7 @@ export function Emprestimo() {
                     </TableRow>
                   ) : (
                     emprestimos.map((emprestimo: any) => {
+                      console.log(emprestimos);
                       const dataEmprestimo = emprestimo.dataEmprestimo ? new Date(emprestimo.dataEmprestimo) : null;
                       const dataPrevistaDev = emprestimo.dataPrevistaDev ? new Date(emprestimo.dataPrevistaDev) : null;
                       const dataDevolucao = emprestimo.dataDevolucao ? new Date(emprestimo.dataDevolucao) : null;

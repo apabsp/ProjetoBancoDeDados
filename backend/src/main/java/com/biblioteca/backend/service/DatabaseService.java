@@ -192,23 +192,62 @@ public class DatabaseService {
     }
 
     // Method to update an "Obra"
-    public String atualizarObra(Long id, String titulo, java.sql.Date ano, String genero) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String sql = "UPDATE Obra SET titulo = ?, ano_lanc = ?, genero = ? WHERE cod_barras = ?";
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                stmt.setString(1, titulo);  // Set the title
-                stmt.setDate(2, ano);        // Set the date
-                stmt.setString(3, genero);  // Set the genre
-                stmt.setLong(4, id);        // Set the id for the WHERE clause
+    public String atualizarObra(String cod_barras, ObraDTO dto) {
+        try(Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)){
+            String sql = "UPDATE obra SET titulo = ?, ano_lanc = ? WHERE cod_barras = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)){
+                stmt.setString(1, dto.getTitulo());
+                stmt.setDate(2, dto.getAno_lanc());
+                stmt.setString(3, cod_barras);// Or dto.cod_barras I believe. Actually it won't come with any cod_barras.
+                int linesThatHaveBeenAffected = stmt.executeUpdate();
 
-                stmt.executeUpdate();
-                return "Obra atualizada com sucesso!";
+                if (linesThatHaveBeenAffected > 0){
+                    return "Obra atualizada com sucesso!";
+                } else{
+                    return "Nenhuma obra encontrada para atualizar.";
+                }
+            }
+
+
+        } catch (SQLException e){
+            e.printStackTrace();
+            return "Erro ao ATUALIZAR a obra: " + e.getMessage();
+        }
+
+    }
+
+    public ObraDTO buscarObraPorCodBarras(String codBarras) {
+        System.out.println("Buscando obra com código de barras: " + codBarras);
+        String sql = "SELECT cod_barras, titulo, ano_lanc FROM obra WHERE cod_barras = ?";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, codBarras);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    ObraDTO obra = new ObraDTO();
+                    obra.setCod_barras(rs.getString("cod_barras"));
+                    obra.setTitulo(rs.getString("titulo"));
+
+                    java.sql.Date sqlDate = rs.getDate("ano_lanc");
+                    if (sqlDate != null) {
+                        obra.setAno_lanc(sqlDate);
+                    }
+
+                    return obra;
+                } else {
+                    // Obra não encontrada — lançar exceção
+                    throw new RuntimeException("Obra não encontrada com código de barras: " + codBarras);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return "Erro ao atualizar obra: " + e.getMessage();
+            throw new RuntimeException("Erro ao buscar obra no banco de dados", e);
         }
     }
+
 
     // Method to select all "Obras"
     public List<ObraDTO> visualizarObras() {
@@ -328,6 +367,21 @@ public class DatabaseService {
 }
 
      */
+
+    public String deletarObraPorCodBarras(String cod_barras){
+        String string = "DELETE FROM obra WHERE cod_barras = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)){
+            PreparedStatement stmt = connection.prepareStatement(string);
+            stmt.setString(1,cod_barras);
+            stmt.executeUpdate();
+            System.out.println("DeletarObraPorCodBarra rodou!");
+            return "DeletarObraPorCodBarra rodou!";
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Something went wrong when trying deletarObraPorCodBarras";
+    }
+
 
     public String visualizarObrasPorAutor(String idAutor) {
         String sql = """

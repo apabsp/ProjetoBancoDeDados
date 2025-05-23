@@ -44,9 +44,30 @@ public class ObraController {
             return databaseService.atualizarObra(cod_barras, obraDTO.getTitulo(), obraDTO.getAno_lanc());
         }
         */
+
+    @PutMapping("/alterar")
+    public String atualizarObra(@RequestParam String cod_barras, @RequestBody ObraDTO dto) {
+        return databaseService.atualizarObra(cod_barras, dto);
+    }
+
+
+    @GetMapping("/visualizar/{cod_barras}")
+    public ObraDTO buscarObraPorCodBarras(@PathVariable String cod_barras){
+        //System.out.println("getMaps to cod_barras visualizar");
+        return databaseService.buscarObraPorCodBarras(cod_barras);
+    }
+
     @GetMapping("/visualizar")
     public List<ObraDTO> visualizarObras() {
         System.out.println("📥 GET /api/obra/visualizar was called");
         return databaseService.visualizarObras();
     }
+
+    @GetMapping("/deletar/{cod_barras}")
+    public String deletarObraPorCodBarras(@PathVariable String cod_barras){
+        System.out.println("deletar obra por cod barra");
+        return databaseService.deletarObraPorCodBarras(cod_barras);
+    }
+
+
 }

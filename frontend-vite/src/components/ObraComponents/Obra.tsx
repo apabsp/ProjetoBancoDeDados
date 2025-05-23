@@ -109,13 +109,14 @@ export function Obra() {
         
       case "inserir":
         return <InserirObra />;
-        /*
+        
       case "atualizar":
 
         return <AtualizarObra />;
+        
       case "deletar":
         return <DeletarObra />;
-        */
+        
       default:
         return null;
     }
