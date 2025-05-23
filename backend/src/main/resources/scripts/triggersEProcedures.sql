@@ -19,3 +19,23 @@ BEGIN
 END
 
 DELIMITER ;
+
+
+CREATE TRIGGER verificar_exemplar_disponivel
+BEFORE INSERT ON Emprestimo_aluga
+FOR EACH ROW
+BEGIN
+	DECLARE exemplar_em_uso int DEFAULT 0;
+
+	-- CHECK AQUI PRA VER SE O ITEM JÁ FOI RETORNADO
+	SELECT count(*) INTO exemplar_em_uso
+	FROM emprestimo_aluga ea
+	WHERE fk_exemplar = NEW.fk_exemplar
+	AND data_devolucao IS NULL;
+
+	IF exemplar_em_uso > 0 THEN
+		SIGNAL SQLSTATE '45000'  -- This IS how you SIGNAL an error apparently.
+		SET MESSAGE_TEXT = "Exemplar já está emprestado e não devolvido.";
+	END IF;
+
+END

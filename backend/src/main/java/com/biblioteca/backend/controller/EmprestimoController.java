@@ -35,6 +35,9 @@ public class EmprestimoController {
     // Endpoint para inserir um novo empréstimo
     @PostMapping("/inserir")
     public String inserirEmprestimo(@RequestBody EmprestimoDTO dto) {
+        // First check if exemplar is available. Will do this with trigger.
+
+
         try {
             String id = "emp-" + UUID.randomUUID();
 
@@ -59,6 +62,8 @@ public class EmprestimoController {
             return "Erro ao inserir empréstimo: " + e.getMessage();
         }
     }
+
+
 
     @GetMapping("/visualizar/{id}")
     public EmprestimoDTO visualizarEmprestimoPorId(@PathVariable String id) {
