@@ -1,5 +1,6 @@
 package com.biblioteca.backend.service;
 
+import com.biblioteca.backend.dto.ClienteDTO;
 import com.biblioteca.backend.dto.EmprestimoDTO;
 import com.biblioteca.backend.dto.ExemplarDTO;
 import com.biblioteca.backend.dto.ObraDTO;
@@ -131,6 +132,34 @@ public class DatabaseService {
             return "Erro ao inserir gênero: " + e.getMessage();
         }
     }
+
+    public List<ClienteDTO> visualizarClientes() {
+        List<ClienteDTO> clientes = new ArrayList<>();
+
+        String sql = "SELECT c.id, c.historico, c.fk_Pessoa_id, p.nome " +
+                "FROM cliente c " +
+                "JOIN pessoa p ON c.fk_Pessoa_id = p.id";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                ClienteDTO cliente = new ClienteDTO();
+                cliente.setId(rs.getString("id"));
+                cliente.setHistorico(rs.getString("historico"));
+                cliente.setFkPessoaId(rs.getString("fk_pessoa_id"));
+                cliente.setNomePessoa(rs.getString("nome")); // Adicione este campo na sua ClienteDTO
+
+                clientes.add(cliente);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return clientes;
+    }
+
 
     // Method to insert a new "Obra"
     public String inserirObra(String codBarras, String titulo, java.sql.Date ano) {
@@ -504,7 +533,7 @@ public class DatabaseService {
         return null; // Return null if not found or error occurs
     }
 
-    public List<ExemplarDTO> listarExemplares() { // provavelmente não funciona
+    public List<ExemplarDTO> listarExemplares() {
         List<ExemplarDTO> exemplares = new ArrayList<>();
 
         String sql = "SELECT id, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero FROM Exemplar";
@@ -1005,4 +1034,154 @@ public class DatabaseService {
     }
 
 
+    public String inserirPessoaParaCliente(String nomePessoa, String historicoCliente) {
+        Connection connection = null;
+        PreparedStatement stmtPessoa = null;
+        PreparedStatement stmtCliente = null;
+
+        try {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            connection.setAutoCommit(false); // serve mesmo?
+
+            // Gerar ID para pessoa
+            String idPessoa = UUID.randomUUID().toString();
+
+            //Inserir pessoa
+            String sqlPessoa = "INSERT INTO pessoa (id, nome) values (?, ?)";
+            stmtPessoa = connection.prepareStatement(sqlPessoa);
+            stmtPessoa.setString(1,idPessoa);
+            stmtPessoa.setString(2,nomePessoa);
+            stmtPessoa.executeUpdate();
+
+            // 3. Gerar ID para Cliente
+            String idCliente = UUID.randomUUID().toString();
+
+            // 4. Inserir Cliente vinculado
+            String sqlCliente = "INSERT INTO Cliente (id, historico, fk_Pessoa_id) VALUES (?, ?, ?)";
+            stmtCliente = connection.prepareStatement(sqlCliente);
+            stmtCliente.setString(1, idCliente);
+            stmtCliente.setString(2, historicoCliente);
+            stmtCliente.setString(3, idPessoa);
+            stmtCliente.executeUpdate();
+
+            connection.commit(); // Confirma transação
+            return "Cliente cadastrado com sucesso! ID: " + idCliente;
+        }
+        catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback(); // Em caso de erro, desfaz as operações
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return "Erro ao cadastrar cliente: " + e.getMessage();
+        } finally {
+            try {
+                if (stmtPessoa != null) stmtPessoa.close();
+                if (stmtCliente != null) stmtCliente.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public String atualizarClienteEPessoa(String clienteId, String novoNome, String novoHistorico) {
+        // Validações iniciais
+        if (clienteId == null || clienteId.trim().isEmpty()) {
+            return "ID do cliente é obrigatório";
+        }
+        if (novoNome == null || novoNome.trim().isEmpty()) {
+            return "Nome da pessoa é obrigatório";
+        }
+
+        // Use try-with-resources para fechar automaticamente
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            connection.setAutoCommit(false);
+
+            try {
+                // 1. Obter ID da Pessoa
+                String pessoaId;
+                String sqlGetPessoa = "SELECT fk_Pessoa_id FROM Cliente WHERE id = ?";
+                try (PreparedStatement stmt = connection.prepareStatement(sqlGetPessoa)) {
+                    stmt.setString(1, clienteId);
+                    ResultSet rs = stmt.executeQuery();
+                    if (!rs.next()) {
+                        System.out.println("Cliente não encontrado");
+                        return "Cliente não encontrado";
+                    }
+                    pessoaId = rs.getString("fk_Pessoa_id");
+                }
+
+                // 2. Atualizar Pessoa
+                String sqlPessoa = "UPDATE Pessoa SET nome = ? WHERE id = ?";
+                try (PreparedStatement stmt = connection.prepareStatement(sqlPessoa)) {
+                    stmt.setString(1, novoNome);
+                    stmt.setString(2, pessoaId);
+                    if (stmt.executeUpdate() == 0) {
+                        connection.rollback();
+                        System.out.println("Falha ao atualizar Pessoa;");
+                        return "Falha ao atualizar Pessoa";
+                    }
+                }
+
+                // 3. Atualizar Cliente
+                String sqlCliente = "UPDATE Cliente SET historico = ? WHERE id = ?";
+                try (PreparedStatement stmt = connection.prepareStatement(sqlCliente)) {
+                    stmt.setString(1, novoHistorico != null ? novoHistorico : "");
+                    stmt.setString(2, clienteId);
+                    if (stmt.executeUpdate() == 0) {
+                        connection.rollback();
+                        System.out.println("Falha ao atualizar Cliente;");
+                        return "Falha ao atualizar Cliente";
+                    }
+                }
+
+                connection.commit();
+                return "Atualização realizada com sucesso";
+
+            } catch (SQLException e) {
+                connection.rollback();
+                return "Erro no banco de dados: " + e.getMessage();
+            }
+        } catch (SQLException e) {
+            return "Erro de conexão: " + e.getMessage();
+        }
+    }
+
+
+    public String deletarCliente(String clienteId) {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+
+        try {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+
+            // this will leave pessoa intact though :/ will do for now
+            String sql = "DELETE FROM Cliente WHERE id = ?";
+            stmt = connection.prepareStatement(sql);
+            stmt.setString(1, clienteId);
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected == 0) {
+                return "Cliente não encontrado!";
+            }
+            return "Cliente deletado com sucesso!";
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Erro ao deletar cliente: " + e.getMessage();
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
