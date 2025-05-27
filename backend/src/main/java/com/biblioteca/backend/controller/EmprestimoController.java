@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID; // Randomizer
 
 @RestController
@@ -29,6 +30,11 @@ public class EmprestimoController {
             e.printStackTrace();
             return "Erro ao calcular dias até devolução: " + e.getMessage();
         }
+    }
+
+    @GetMapping("/emprestimos-por-cliente")
+    public Map<String, Integer> emprestimosPorCliente() {
+        return db.contarEmprestimosPorCliente();
     }
 
 

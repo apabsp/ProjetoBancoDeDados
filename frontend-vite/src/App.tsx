@@ -4,6 +4,7 @@ import Exemplar from './components/Exemplar';
 import Emprestimo from './components/Emprestimo';
 import Obra from './components/ObraComponents/Obra';
 import Cliente from './components/ClienteComponents/Cliente';
+import EmprestimosPorPessoa from './components/funcionarios/EmprestimosPorPessoa';
 //import { Edicao } from './components/EdicaoComponents/Edicao';
 
 function App() {
@@ -49,7 +50,7 @@ function App() {
           {activeComponent === 'materiais' && <div><Obra/></div>}
           {activeComponent === 'clientes' && <div><Emprestimo/></div>}
           {activeComponent === 'clientes' && <div><Cliente/> </div>}
-          {activeComponent === 'funcionarios' && <div>Em construção</div>}
+          {activeComponent === 'funcionarios' && <div>Em construção <EmprestimosPorPessoa/></div>}
         </div>
       </div>
     </>

@@ -5,18 +5,21 @@ import com.biblioteca.backend.dto.EmprestimoDTO;
 import com.biblioteca.backend.dto.ExemplarDTO;
 import com.biblioteca.backend.dto.ObraDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.*;
-import java.util.UUID;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Date;
+import java.util.*;
 import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Service
 public class DatabaseService {
@@ -49,6 +52,36 @@ public class DatabaseService {
             System.out.println("Erro ao executar o script: " + e.getMessage());
         }
     }
+
+
+    public Map<String,Integer> contarEmprestimosPorCliente() {
+        String sql = """
+                SELECT pessoa.nome, COUNT(*) AS total
+                FROM emprestimo_aluga
+                JOIN cliente ON emprestimo_aluga.fk_cliente = cliente.id
+                JOIN pessoa ON cliente.fk_Pessoa_id = pessoa.id
+                GROUP BY pessoa.nome;
+                """;
+
+        Map<String, Integer> emprestimosPorCliente = new HashMap<>();
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String nomeCliente = rs.getString("nome");
+                int totalEmprestimos = rs.getInt("total");
+                emprestimosPorCliente.put(nomeCliente, totalEmprestimos);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao contar empréstimos por cliente: " + e.getMessage());
+        }
+        return emprestimosPorCliente;
+    }
+
+
 
     public String inserirEditora(String id, String nome) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
