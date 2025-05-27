@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
+import java.io.InputStream;
+
 //Run this to start backend
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class BackendApplication implements CommandLineRunner {
@@ -20,7 +22,10 @@ public class BackendApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        InputStream test = getClass().getResourceAsStream("/scripts/schema.sql");
+        System.out.println("Achou? " + (test != null)); // nice
         dbService.executarScript("/scripts/schema.sql");
-        dbService.executarScript("/scripts/triggersEProcedures.sql");
+        //dbService.executarScript("/scripts/triggersEProcedures.sql");
+        dbService.criarTriggerEFunction();
     }
 }

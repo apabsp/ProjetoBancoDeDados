@@ -26,10 +26,74 @@ public class DatabaseService {
 
     private static final String URL = "jdbc:mysql://localhost:3306/biblioteca"; // jdbc is necessary for the protocol identifier
     private static final String USER = "root";
-    private static final String PASSWORD = "12345";
+    private static final String PASSWORD = "123456";
 
 
     // Method to execute SQL script (like schema.sql)
+    public void criarTriggerEFunction() {
+        String function = """
+        CREATE FUNCTION dias_ate_devolucao(idEmprestimo VARCHAR(50)) RETURNS INT
+        DETERMINISTIC
+        BEGIN
+            DECLARE dias INT;
+            SELECT DATEDIFF(DATE(data_prevista_dev), CURDATE())
+            INTO dias
+            FROM Emprestimo_aluga
+            WHERE id = idEmprestimo;
+            RETURN dias;
+        END
+        """;
+
+        String trigger = """
+        CREATE TRIGGER verificar_exemplar_disponivel
+        BEFORE INSERT ON Emprestimo_aluga
+        FOR EACH ROW
+        BEGIN
+            DECLARE exemplar_em_uso INT DEFAULT 0;
+            SELECT COUNT(*) INTO exemplar_em_uso
+            FROM emprestimo_aluga ea
+            WHERE fk_exemplar = NEW.fk_exemplar AND data_devolucao IS NULL;
+
+            IF exemplar_em_uso > 0 THEN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Exemplar já está emprestado e não devolvido.';
+            END IF;
+        END
+        """;
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement stmt = conn.createStatement()) {
+
+            // Primeiro, tentar remover a função e trigger se já existirem.
+            try {
+                stmt.execute("DROP FUNCTION IF EXISTS dias_ate_devolucao");
+                System.out.println("Função antiga removida (se existia).");
+            } catch (SQLException e) {
+                System.out.println("Erro ao remover função: " + e.getMessage());
+            }
+
+            try {
+                stmt.execute("DROP TRIGGER IF EXISTS verificar_exemplar_disponivel");
+                System.out.println("Trigger antiga removida (se existia).");
+            } catch (SQLException e) {
+                System.out.println("Erro ao remover trigger: " + e.getMessage());
+            }
+
+            // Agora criar a função
+            stmt.execute(function);
+            System.out.println("Função criada com sucesso!");
+
+            // Agora criar a trigger
+            stmt.execute(trigger);
+            System.out.println("Trigger criada com sucesso!");
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao criar trigger ou função: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     public void executarScript(String scriptPath) {
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              Statement stmt = conn.createStatement();
