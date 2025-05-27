@@ -3,6 +3,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
 function InserirExemplar() {
+  const [fkObraCodBarras, setFkObraCodBarras] = useState(""); // Novo campo
   const [fkEdicao, setFkEdicao] = useState("");
   const [fkArtigo, setFkArtigo] = useState("");
   const [fkEstanteNumero, setFkEstanteNumero] = useState("");
@@ -11,6 +12,7 @@ function InserirExemplar() {
 
   const handleSubmit = () => {
     const payload = {
+      fkObraCodBarras,
       fkEdicao,
       fkArtigo,
       fkEstanteNumero,
@@ -38,40 +40,54 @@ function InserirExemplar() {
   return (
     <div className="flex flex-col items-start m-5 gap-4">
       <div className="w-full">
+        <p className="text-xl mb-1">Código de Barras da Obra</p>
+        <Input
+          value={fkObraCodBarras}
+          onChange={e => setFkObraCodBarras(e.target.value)}
+          placeholder="Digite o código de barras da obra"
+        />
+      </div>
+
+      <div className="w-full">
         <p className="text-xl mb-1">ID da Edição</p>
         <Input
           value={fkEdicao}
           onChange={e => setFkEdicao(e.target.value)}
-          placeholder="Digite o ID da edição"
+          placeholder="Digite o ID da edição (opcional)"
         />
       </div>
+
       <div className="w-full">
         <p className="text-xl mb-1">ID do Artigo</p>
         <Input
           value={fkArtigo}
           onChange={e => setFkArtigo(e.target.value)}
-          placeholder="Digite o ID do artigo"
+          placeholder="Digite o ID do artigo (opcional)"
         />
       </div>
+
       <div className="w-full">
         <p className="text-xl mb-1">Número da Estante</p>
         <Input
           value={fkEstanteNumero}
           onChange={e => setFkEstanteNumero(e.target.value)}
-          placeholder="Digite o número da estante"
+          placeholder="Digite o número da estante (opcional)"
         />
       </div>
+
       <div className="w-full">
         <p className="text-xl mb-1">Prateleira da Estante</p>
         <Input
           value={fkEstantePrateleira}
           onChange={e => setFkEstantePrateleira(e.target.value)}
-          placeholder="Digite a prateleira da estante"
+          placeholder="Digite a prateleira da estante (opcional)"
         />
       </div>
+
       <Button className="mt-4 p-4 bg-gray-200 hover:bg-gray-300 text-black" onClick={handleSubmit}>
         Salvar
       </Button>
+
       {mensagem && <p className="text-md mt-2 text-green-600">{mensagem}</p>}
     </div>
   );

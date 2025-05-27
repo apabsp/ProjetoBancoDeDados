@@ -26,7 +26,7 @@ public class DatabaseService {
 
     private static final String URL = "jdbc:mysql://localhost:3306/biblioteca"; // jdbc is necessary for the protocol identifier
     private static final String USER = "root";
-    private static final String PASSWORD = "123456";
+    private static final String PASSWORD = "12345";
 
 
     // Method to execute SQL script (like schema.sql)
@@ -633,7 +633,15 @@ public class DatabaseService {
     public List<ExemplarDTO> listarExemplares() {
         List<ExemplarDTO> exemplares = new ArrayList<>();
 
-        String sql = "SELECT id, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero FROM Exemplar";
+        String sql = """
+        SELECT e.id, e.fk_edicao,
+                                   e.fk_artigo,
+                                   e.fk_estante_prateleira,
+                                   e.fk_estante_numero,
+                                   o.titulo AS nome_obra
+                            FROM Exemplar e
+                            JOIN Obra o ON e.fk_obra_cod_barras = o.cod_barras;
+    """;
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = connection.prepareStatement(sql);
@@ -646,21 +654,24 @@ public class DatabaseService {
                 exemplar.setFkArtigo(rs.getString("fk_artigo"));
                 exemplar.setFkEstantePrateleira(rs.getString("fk_estante_prateleira"));
                 exemplar.setFkEstanteNumero(rs.getString("fk_estante_numero"));
+                exemplar.setNomeObra(rs.getString("nome_obra")); // <- novo campo
 
                 exemplares.add(exemplar);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return exemplares;
     }
+
 
     // Insere um novo Exemplar (PK = id; FK para edição ou artigo, e FK para estante)
     public String inserirExemplar(String idExemplar, ExemplarDTO dto) {
         String sql = """
         INSERT INTO Exemplar
-            (id, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero)
-        VALUES (?, ?, ?, ?, ?)
+            (id, fk_obra_cod_barras, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero)
+        VALUES (?, ?, ?, ?, ?, ?)
     """;
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -668,20 +679,32 @@ public class DatabaseService {
 
             stmt.setString(1, idExemplar);
 
-            if (dto.getFkEdicao() != null && !dto.getFkEdicao().isEmpty()) {
-                stmt.setString(2, dto.getFkEdicao());
-            } else {
-                stmt.setNull(2, Types.VARCHAR);
-            }
+            stmt.setString(2, dto.getFkObraCodBarras()); // novo campo
 
-            if (dto.getFkArtigo() != null && !dto.getFkArtigo().isEmpty()) {
-                stmt.setString(3, dto.getFkArtigo());
+            if (dto.getFkEdicao() != null && !dto.getFkEdicao().isEmpty()) { // We need to verify if the object exists first before checking if its empty
+                stmt.setString(3, dto.getFkEdicao());
             } else {
                 stmt.setNull(3, Types.VARCHAR);
             }
 
-            stmt.setString(4, dto.getFkEstantePrateleira());
-            stmt.setString(5, dto.getFkEstanteNumero());
+            if (dto.getFkArtigo() != null && !dto.getFkArtigo().isEmpty()) {
+                stmt.setString(4, dto.getFkArtigo());
+            } else {
+                stmt.setNull(4, Types.VARCHAR);
+            }
+
+            if (dto.getFkEstantePrateleira() != null && !dto.getFkEstantePrateleira().isEmpty()) {
+                stmt.setString(5, dto.getFkEstantePrateleira());
+            } else {
+                stmt.setNull(5, Types.VARCHAR);
+            }
+
+            stmt.setString(6, dto.getFkEstanteNumero());
+            if (dto.getFkEstanteNumero() != null && !dto.getFkEstanteNumero().isEmpty()) {
+                stmt.setString(6, dto.getFkEstantePrateleira());
+            } else {
+                stmt.setNull(6, Types.VARCHAR);
+            }
 
             stmt.executeUpdate();
             return "Exemplar inserido com sucesso!";
@@ -969,7 +992,7 @@ public class DatabaseService {
                 dto.setDataEmprestimo(dataEmprestimo != null ? dataEmprestimo.toLocalDateTime() : null);
 
                 dto.setFkExemplar(rs.getString("fk_exemplar"));
-                dto.setNomeExemplar(rs.getString("nome_exemplar"));
+                dto.setNomeObra(rs.getString("nome_exemplar"));
 
                 dto.setFkCliente(rs.getString("fk_cliente"));
                 dto.setNomeCliente(rs.getString("nome_cliente"));
@@ -1042,7 +1065,7 @@ public class DatabaseService {
                     dto.setDataEmprestimo(dataEmprestimo != null ? dataEmprestimo.toLocalDateTime() : null);
 
                     dto.setFkExemplar(rs.getString("fk_exemplar"));
-                    dto.setNomeExemplar(rs.getString("nome_exemplar"));
+                    dto.setNomeObra(rs.getString("nome_exemplar"));
 
                     dto.setFkCliente(rs.getString("fk_cliente"));
                     dto.setNomeCliente(rs.getString("nome_cliente"));

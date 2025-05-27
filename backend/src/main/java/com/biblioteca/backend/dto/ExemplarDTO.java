@@ -6,6 +6,8 @@ public class ExemplarDTO {
     private String fkArtigo;
     private String fkEstantePrateleira;
     private String fkEstanteNumero;
+    private String fkObraCodBarras; // novo campo
+    private String nomeObra;
 
     // Getters e Setters
     public String getId() {
@@ -46,5 +48,21 @@ public class ExemplarDTO {
 
     public void setFkEstanteNumero(String fkEstanteNumero) {
         this.fkEstanteNumero = fkEstanteNumero;
+    }
+
+    public String getFkObraCodBarras(){
+        return fkObraCodBarras;
+    }
+
+    public void setFkObraCodBarras(String fkObraCodBarras){
+        this.fkObraCodBarras = fkObraCodBarras;
+    }
+
+    public String getNomeObra() {
+        return nomeObra;
+    }
+
+    public void setNomeObra(String nomeObra) {
+        this.nomeObra = nomeObra;
     }
 }

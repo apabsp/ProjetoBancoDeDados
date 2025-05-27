@@ -79,14 +79,24 @@ CREATE TABLE IF NOT EXISTS Edicao (
 -- 4) Exemplar references composite Estante and new Artigo PK
 CREATE TABLE IF NOT EXISTS Exemplar (
     id VARCHAR(50) PRIMARY KEY,
+
+    -- Original foreign keys
     fk_edicao VARCHAR(50),
     fk_artigo VARCHAR(50),
+
+    -- Estante composite foreign key
     fk_estante_prateleira VARCHAR(50),
     fk_estante_numero VARCHAR(50),
+
+    -- NEW: direct reference to the Obra
+    fk_obra_cod_barras VARCHAR(50),
+
+    -- Constraints
     CONSTRAINT FK_Exemplar_Edicao FOREIGN KEY (fk_edicao) REFERENCES Edicao(id),
     CONSTRAINT FK_Exemplar_Artigo FOREIGN KEY (fk_artigo) REFERENCES Artigo(id),
     CONSTRAINT FK_Exemplar_Estante FOREIGN KEY (fk_estante_prateleira, fk_estante_numero)
-      REFERENCES Estante(prateleira, numero)
+        REFERENCES Estante(prateleira, numero),
+    CONSTRAINT FK_Exemplar_Obra FOREIGN KEY (fk_obra_cod_barras) REFERENCES Obra(cod_barras)
 );
 
 -- 5) Join tables

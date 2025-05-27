@@ -81,7 +81,7 @@ export function Emprestimo() {
                           <TableCell>{dataEmprestimo?.toLocaleDateString() || "-"}</TableCell>
                           <TableCell>{dataPrevistaDev?.toLocaleDateString() || "-"}</TableCell>
                           <TableCell>{dataDevolucao?.toLocaleDateString() || "-"}</TableCell>
-                          <TableCell>{emprestimo.fkExemplar} / {emprestimo.nomeExemplar}</TableCell>
+                          <TableCell>{emprestimo.fkExemplar} / {emprestimo.nomeObra}</TableCell>
                           <TableCell>{emprestimo.fkCliente} / {emprestimo.nomeCliente}</TableCell>
                           <TableCell className="flex items-center">
                             <Button 

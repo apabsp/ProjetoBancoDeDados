@@ -29,6 +29,7 @@ export function Exemplar() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
+                    <TableHead>Obra</TableHead>
                     <TableHead>Edição</TableHead>
                     <TableHead>Artigo</TableHead>
                     <TableHead>Estante (Prateleira / Número)</TableHead>
@@ -45,6 +46,7 @@ export function Exemplar() {
                     exemplares.map((exemplar: any) => (
                       <TableRow key={exemplar.id}>
                         <TableCell className="font-medium">{exemplar.id}</TableCell>
+                        <TableCell>{exemplar.nomeObra}</TableCell>
                         <TableCell>{exemplar.fkEdicao}</TableCell>
                         <TableCell>{exemplar.fkArtigo}</TableCell>
                         <TableCell>{exemplar.fkEstantePrateleira} / {exemplar.fkEstanteNumero}</TableCell>
