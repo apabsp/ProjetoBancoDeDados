@@ -16,3 +16,4 @@ O sistema segue uma abordagem modular, onde cada domínio é projetado para func
 - Create a biblioteca database on Beaver!!! 
 - Dentro do Intellij, jogar o mysql-connector-j-9.2.0.jar em File -> Project Structure -> Libraries e Modules(Ambos)
 - No Intellij, marcar a pasta resources como Resources Root
+- No Intellij, marcar a pasta java como Source
