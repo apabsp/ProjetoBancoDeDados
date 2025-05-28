@@ -11,12 +11,18 @@ function InserirExemplar() {
   const [mensagem, setMensagem] = useState("");
 
   const handleSubmit = () => {
+    // Validate estante fields - both must be provided or both must be empty
+    if ((!fkEstantePrateleira && fkEstanteNumero) || (fkEstantePrateleira && !fkEstanteNumero)) {
+        setMensagem("Por favor, forneça ambos número e prateleira da estante ou deixe ambos em branco");
+        return;
+    }
+
     const payload = {
-      fkObraCodBarras,
-      fkEdicao,
-      fkArtigo,
-      fkEstanteNumero,
-      fkEstantePrateleira
+        fkObraCodBarras,
+        fkEdicao,
+        fkArtigo,
+        fkEstantePrateleira: fkEstantePrateleira || null,
+        fkEstanteNumero: fkEstanteNumero || null
     };
 
     fetch("http://localhost:8080/api/exemplar/inserir", {

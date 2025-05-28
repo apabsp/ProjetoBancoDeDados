@@ -37,6 +37,33 @@ public class EmprestimoController {
         return db.contarEmprestimosPorCliente();
     }
 
+    @GetMapping("/emprestimos-por-periodo")
+    public Map<String, Integer> emprestimosPorPeriodo(@RequestParam String tipo) {
+        System.out.println("Tipo de agrupamento recebido: " + tipo);
+        Map<String, Integer> resultado = db.contarEmprestimosPorPeriodo(tipo);
+        System.out.println("Resultado: " + resultado);
+        return resultado;
+    }
+
+    @GetMapping("/emprestimos-por-obra")
+    public List<Map<String, Object>> emprestimosPorObra(@RequestParam String tipo) {
+        return db.contarEmprestimosPorObra(tipo);
+    }
+
+    @GetMapping("/top-funcionario")
+    public Map<String, Object> obterTopFuncionarioPorPeriodo(
+            @RequestParam String tipo,
+            @RequestParam String agrupadoPor
+    ) {
+        System.out.println("Iniciando top funcionário");
+        try {
+            return db.obterTopFuncionarioPorPeriodo(tipo, agrupadoPor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Map.of("erro", "Erro ao obter top funcionário: " + e.getMessage());
+        }
+    }
+
 
     // Endpoint para inserir um novo empréstimo
     @PostMapping("/inserir")
