@@ -1,0 +1,35 @@
+Documentation on how all of this works:
+
+First, we set up a biblioteca database.
+CORS, on the backend, will allow requests from the front-end to the back-end. (src->main->java->CorsConfig)
+
+
+SCRIPTS
+on our resources->scripts folder, we can find useful scripts: schema(construct database's tables, but make sure you already have a biblioteca database on your dbeaver) and seed(add examples to the database)
+
+-----------
+So make sure we have all of these tables, gonna verify em all now:
+-Autor (verified)
+-Editora (verified)
+-escreve (verified)
+-publica (verified)
+-Obra (verified and modified)
+-pertence(verified)
+-Genero (verified)
+-Livro (verified)
+-Edicao (verified and nome added)
+-Artigo (verified)
+-Exemplar (verified)
+-Estante (need to verify)
+-Emprestimo_aluga(verified but need to verify. hora goes into data_emprestimo now as dateTime.)
+-Altera(not added yet)
+-Pessoa(nome added and verified)
+-Cliente(verified)
+-Telefone
+-Funcionario
+
+
+-------------
+
+How the program itself works: frontend asks for the backend to act on the sql database, simple.
+
