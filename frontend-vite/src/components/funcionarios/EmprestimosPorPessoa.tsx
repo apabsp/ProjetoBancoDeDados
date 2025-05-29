@@ -55,7 +55,7 @@ export function EmprestimosPorPessoa() {
   };
 
   return (
-    <div className="m-6">
+    <div className="m-6" >
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Empréstimos por Pessoa</h1>
         <Button onClick={fetchEmprestimos} className="flex items-center gap-2">

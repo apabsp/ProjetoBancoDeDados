@@ -5,6 +5,9 @@ import Emprestimo from './components/Emprestimo';
 import Obra from './components/ObraComponents/Obra';
 import Cliente from './components/ClienteComponents/Cliente';
 import EmprestimosPorPessoa from './components/funcionarios/EmprestimosPorPessoa';
+import EmprestimosPorPeriodo from './components/funcionarios/EmprestimosPorPeriodo';
+import TopFuncionarioCard from './components/funcionarios/TopFuncionarioCard';
+import { EmprestimosPorObra } from './components/funcionarios/EmprestimosPorObra';
 //import { Edicao } from './components/EdicaoComponents/Edicao';
 
 function App() {
@@ -50,7 +53,17 @@ function App() {
           {activeComponent === 'materiais' && <div><Obra/></div>}
           {activeComponent === 'clientes' && <div><Emprestimo/></div>}
           {activeComponent === 'clientes' && <div><Cliente/> </div>}
-          {activeComponent === 'funcionarios' && <div>Em construção <EmprestimosPorPessoa/></div>}
+          {activeComponent === 'funcionarios' && (
+            <div>
+              <div className="flex">
+                <EmprestimosPorPeriodo />
+                <TopFuncionarioCard />
+                <EmprestimosPorObra />
+              </div>
+              <EmprestimosPorPessoa />
+              
+            </div>
+          )}
         </div>
       </div>
     </>

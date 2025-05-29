@@ -6,6 +6,7 @@ import com.biblioteca.backend.dto.ExemplarDTO;
 import com.biblioteca.backend.dto.ObraDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -145,7 +146,96 @@ public class DatabaseService {
         return emprestimosPorCliente;
     }
 
+    public Map<String, Integer> contarEmprestimosPorPeriodo(String tipo) {
+        String sql;
 
+        if (tipo.equalsIgnoreCase("ano")) {
+            sql = """
+            SELECT YEAR(data_emprestimo) AS periodo, COUNT(*) AS total
+            FROM emprestimo_aluga
+            GROUP BY YEAR(data_emprestimo)
+            ORDER BY YEAR(data_emprestimo);
+        """;
+        } else { // "mes" or default
+            sql = """
+            SELECT DATE_FORMAT(data_emprestimo, '%Y-%m') AS periodo, COUNT(*) AS total
+            FROM emprestimo_aluga
+            GROUP BY DATE_FORMAT(data_emprestimo, '%Y-%m')
+            ORDER BY DATE_FORMAT(data_emprestimo, '%Y-%m');
+        """;
+        }
+
+        Map<String, Integer> emprestimosPorPeriodo = new LinkedHashMap<>();
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String periodo = rs.getString("periodo");
+                int total = rs.getInt("total");
+
+                if (periodo != null) { // ⛔ Evita chave nula no Map
+                    emprestimosPorPeriodo.put(periodo, total);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro SQL: " + e.getMessage());
+            e.printStackTrace(); // Mostra mais detalhes da falha
+        }
+        return emprestimosPorPeriodo;
+    }
+
+    public Map<String, Object> obterTopFuncionarioPorPeriodo(String tipo, String agrupadoPor) {
+        String sql;
+        if (tipo.equalsIgnoreCase("ano")) {
+            sql = """
+            SELECT p.nome AS nome_funcionario, COUNT(*) AS total_emprestimos
+            FROM emprestimo_aluga ea
+            JOIN funcionario f ON ea.fk_funcionario = f.id
+            JOIN pessoa p ON f.fk_Pessoa_id = p.id
+            WHERE YEAR(ea.data_emprestimo) = ?
+            GROUP BY p.nome
+            ORDER BY total_emprestimos DESC
+            LIMIT 1;
+        """;
+        } else { // tipo = mes
+            sql = """
+            SELECT p.nome AS nome_funcionario, COUNT(*) AS total_emprestimos
+            FROM emprestimo_aluga ea
+            JOIN funcionario f ON ea.fk_funcionario = f.id
+            JOIN pessoa p ON f.fk_Pessoa_id = p.id
+            WHERE DATE_FORMAT(ea.data_emprestimo, '%Y-%m') = ?
+            GROUP BY p.nome
+            ORDER BY total_emprestimos DESC
+            LIMIT 1;
+        """;
+        }
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, agrupadoPor);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String nome = rs.getString("nome_funcionario");
+                    int total = rs.getInt("total_emprestimos");
+
+                    return Map.of(
+                            "nome_funcionario", nome,
+                            "total_emprestimos", total
+                    );
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar top funcionário: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return Map.of(); // nenhum resultado encontrado
+    }
 
     public String inserirEditora(String id, String nome) {
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
@@ -160,6 +250,62 @@ public class DatabaseService {
             e.printStackTrace();
             return "Erro ao inserir editora: " + e.getMessage();
         }
+    }
+
+    public List<Map<String, Object>> contarEmprestimosPorObra(String tipo) {
+        String sql;
+
+        if (tipo.equalsIgnoreCase("anual")) {
+            sql = """
+            SELECT 
+                o.titulo AS titulo,
+                DATE_FORMAT(ea.data_emprestimo, '%Y') AS periodo,
+                COUNT(*) AS total
+            FROM emprestimo_aluga ea
+            JOIN exemplar ex ON ea.fk_exemplar = ex.id
+            JOIN obra o ON ex.fk_obra_cod_barras = o.cod_barras
+            GROUP BY o.titulo, DATE_FORMAT(ea.data_emprestimo, '%Y')
+            ORDER BY periodo, o.titulo;
+        """;
+        } else { // tipo = mensal (padrão)
+            sql = """
+            SELECT 
+                o.titulo AS titulo,
+                DATE_FORMAT(ea.data_emprestimo, '%Y-%m') AS periodo,
+                COUNT(*) AS total
+            FROM emprestimo_aluga ea
+            JOIN exemplar ex ON ea.fk_exemplar = ex.id
+            JOIN obra o ON ex.fk_obra_cod_barras = o.cod_barras
+            GROUP BY o.titulo, DATE_FORMAT(ea.data_emprestimo, '%Y-%m')
+            ORDER BY periodo, o.titulo;
+        """;
+        }
+
+        List<Map<String, Object>> resultados = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String titulo = rs.getString("titulo");
+                String periodo = rs.getString("periodo");
+                int total = rs.getInt("total");
+
+                Map<String, Object> linha = new HashMap<>();
+                linha.put("titulo", titulo);
+                linha.put("periodo", periodo);
+                linha.put("total", total);
+
+                resultados.add(linha);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao contar empréstimos por obra: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return resultados;
     }
 
     public List<String> listarEditoras(){
@@ -635,12 +781,12 @@ public class DatabaseService {
 
         String sql = """
         SELECT e.id, e.fk_edicao,
-                                   e.fk_artigo,
-                                   e.fk_estante_prateleira,
-                                   e.fk_estante_numero,
-                                   o.titulo AS nome_obra
-                            FROM Exemplar e
-                            JOIN Obra o ON e.fk_obra_cod_barras = o.cod_barras;
+               e.fk_artigo,
+               e.fk_estante_prateleira,
+               e.fk_estante_numero,
+               o.titulo AS nome_obra
+        FROM Exemplar e
+        LEFT JOIN Obra o ON e.fk_obra_cod_barras = o.cod_barras
     """;
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -654,7 +800,7 @@ public class DatabaseService {
                 exemplar.setFkArtigo(rs.getString("fk_artigo"));
                 exemplar.setFkEstantePrateleira(rs.getString("fk_estante_prateleira"));
                 exemplar.setFkEstanteNumero(rs.getString("fk_estante_numero"));
-                exemplar.setNomeObra(rs.getString("nome_obra")); // <- novo campo
+                exemplar.setNomeObra(rs.getString("nome_obra")); // This will be null for exemplares without obra
 
                 exemplares.add(exemplar);
             }
@@ -669,39 +815,41 @@ public class DatabaseService {
     // Insere um novo Exemplar (PK = id; FK para edição ou artigo, e FK para estante)
     public String inserirExemplar(String idExemplar, ExemplarDTO dto) {
         String sql = """
-        INSERT INTO Exemplar
-            (id, fk_obra_cod_barras, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero)
-        VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO Exemplar
+        (id, fk_obra_cod_barras, fk_edicao, fk_artigo, fk_estante_prateleira, fk_estante_numero)
+    VALUES (?, ?, ?, ?, ?, ?)
     """;
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, idExemplar);
+            stmt.setString(2, dto.getFkObraCodBarras());
 
-            stmt.setString(2, dto.getFkObraCodBarras()); // novo campo
-
-            if (dto.getFkEdicao() != null && !dto.getFkEdicao().isEmpty()) { // We need to verify if the object exists first before checking if its empty
+            // Handle fkEdicao
+            if (dto.getFkEdicao() != null && !dto.getFkEdicao().isEmpty()) {
                 stmt.setString(3, dto.getFkEdicao());
             } else {
                 stmt.setNull(3, Types.VARCHAR);
             }
 
+            // Handle fkArtigo
             if (dto.getFkArtigo() != null && !dto.getFkArtigo().isEmpty()) {
                 stmt.setString(4, dto.getFkArtigo());
             } else {
                 stmt.setNull(4, Types.VARCHAR);
             }
 
+            // Handle fkEstantePrateleira
             if (dto.getFkEstantePrateleira() != null && !dto.getFkEstantePrateleira().isEmpty()) {
                 stmt.setString(5, dto.getFkEstantePrateleira());
             } else {
                 stmt.setNull(5, Types.VARCHAR);
             }
 
-            stmt.setString(6, dto.getFkEstanteNumero());
+            // Handle fkEstanteNumero
             if (dto.getFkEstanteNumero() != null && !dto.getFkEstanteNumero().isEmpty()) {
-                stmt.setString(6, dto.getFkEstantePrateleira());
+                stmt.setString(6, dto.getFkEstanteNumero());
             } else {
                 stmt.setNull(6, Types.VARCHAR);
             }
@@ -1084,6 +1232,7 @@ public class DatabaseService {
     }
 
 
+
     public List<String> listarEmprestimosPorCliente(String fkCliente) {
         List<String> resultado = new ArrayList<>();
         String sql = """
@@ -1323,4 +1472,57 @@ public class DatabaseService {
         }
         return null;
     }
+
+
+
+    public Map<String, Integer> contarEmprestimosPorClienteComFiltro(
+            @RequestParam(required = false) String timeFilter,
+            @RequestParam(required = false) String timeValue) {
+
+        Map<String, Integer> resultado = new HashMap<>();
+
+        // Base SQL query
+        String sql = """
+        SELECT p.nome, COUNT(ea.id) as total
+        FROM Emprestimo_aluga ea
+        JOIN Cliente c ON ea.fk_cliente = c.id
+        JOIN Pessoa p ON c.fk_Pessoa_id = p.id
+    """;
+
+        // Add time filtering if parameters are provided
+        if (timeFilter != null && timeValue != null) {
+            switch (timeFilter) {
+                case "year":
+                    sql += " WHERE YEAR(ea.data_emprestimo) = ?";
+                    break;
+                case "month":
+                    sql += " WHERE MONTH(ea.data_emprestimo) = ? AND YEAR(ea.data_emprestimo) = YEAR(CURRENT_DATE())";
+                    break;
+            }
+        }
+
+        sql += " GROUP BY p.nome";
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set time filter parameter if needed
+            if (timeFilter != null && timeValue != null) {
+                stmt.setInt(1, Integer.parseInt(timeValue));
+            }
+
+            // Execute query
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    resultado.put(rs.getString("nome"), rs.getInt("total"));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return resultado;
+    }
+
 }
